@@ -17,6 +17,8 @@ import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
 import {PageLayout} from './components/PageLayout';
+import {CursorParticles} from './components/hero/CursorParticles';
+import {themeNoFlashScript} from './components/ThemeToggle';
 
 export type RootLoader = typeof loader;
 
@@ -158,18 +160,97 @@ function loadDeferredData({context}: Route.LoaderArgs) {
 export function Layout({children}: {children?: React.ReactNode}) {
   const nonce = useNonce();
 
+  const orgJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'NexGen Toys',
+    url: 'https://nexgen.toys',
+    logo: 'https://nexgen.toys/cdn/shop/files/nexgen-logo.png',
+    sameAs: [
+      'https://www.facebook.com/nexgentoys',
+      'https://www.instagram.com/nexgentoys',
+    ],
+  };
+  const siteJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'NexGen Toys',
+    url: 'https://nexgen.toys',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: 'https://nexgen.toys/search?q={search_term_string}',
+      'query-input': 'required name=search_term_string',
+    },
+  };
+
   return (
     <html lang="en">
       <head>
+        {/* No-FOUC theme bootstrap — must run before stylesheets & React */}
+        <script
+          nonce={nonce}
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{__html: themeNoFlashScript}}
+        />
         <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <link rel="stylesheet" href={tailwindCss}></link>
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, viewport-fit=cover"
+        />
+        <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ff6b35" />
+        <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b1020" />
+        <meta name="color-scheme" content="light dark" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="NexGen Toys" />
+        <meta
+          name="description"
+          content="NexGen Toys — premium RC cars, helicopters, drones, soft toys, board games and outdoor fun. Toys at best price. Buy new."
+        />
+        <meta name="robots" content="index,follow,max-image-preview:large" />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="NexGen Toys" />
+        <meta property="og:title" content="NexGen Toys — Toys at best price. Buy new." />
+        <meta
+          property="og:description"
+          content="Premium RC cars, helicopters, drones, soft toys, board games and outdoor fun for every age."
+        />
+        <meta property="og:image" content="https://nexgen.toys/cdn/shop/files/nexgen-og.jpg" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="NexGen Toys — Toys at best price. Buy new." />
+        <meta
+          name="twitter:description"
+          content="Premium RC cars, helicopters, drones, soft toys, board games and outdoor fun for every age."
+        />
+        <meta name="twitter:image" content="https://nexgen.toys/cdn/shop/files/nexgen-og.jpg" />
+        {/* Load global resets first, app overrides next, then Tailwind utilities last
+            so utility classes (text-white, bg-*, etc.) always win the cascade. */}
         <link rel="stylesheet" href={resetStyles}></link>
         <link rel="stylesheet" href={appStyles}></link>
+        <link rel="stylesheet" href={tailwindCss}></link>
         <Meta />
         <Links />
+        <script
+          type="application/ld+json"
+          nonce={nonce}
+          dangerouslySetInnerHTML={{__html: JSON.stringify(orgJsonLd)}}
+        />
+        <script
+          type="application/ld+json"
+          nonce={nonce}
+          dangerouslySetInnerHTML={{__html: JSON.stringify(siteJsonLd)}}
+        />
       </head>
       <body>
+        {/* ADA / WCAG — skip-to-content link visible only when focused */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-full focus:bg-nexgen-orange focus:text-white focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-white"
+        >
+          Skip to main content
+        </a>
         {children}
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
@@ -194,6 +275,8 @@ export default function App() {
       <PageLayout {...data}>
         <Outlet />
       </PageLayout>
+      {/* Site-wide signature cursor sparkle trail (auto-skips on touch + prefers-reduced-motion) */}
+      <CursorParticles />
     </Analytics.Provider>
   );
 }

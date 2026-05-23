@@ -40,20 +40,20 @@ export function CursorParticles() {
     const colors = ['#FF6B35', '#4ECDC4', '#6C63FF', '#FFE66D'];
 
     const onMove = (e: MouseEvent) => {
-      for (let i = 0; i < 2; i++) {
-        particles.push({
-          x: e.clientX + (Math.random() - 0.5) * 12,
-          y: e.clientY + (Math.random() - 0.5) * 12,
-          vx: (Math.random() - 0.5) * 0.8,
-          vy: -Math.random() * 1.4 - 0.2,
-          life: 0,
-          max: 60 + Math.random() * 50,
-          r: 2 + Math.random() * 6,
-          hue: colors[Math.floor(Math.random() * colors.length)],
-          kind: Math.random() > 0.5 ? 'bubble' : 'spark',
-        });
-      }
-      if (particles.length > 220) particles.splice(0, particles.length - 220);
+      // Throttle: only spawn on a fraction of moves so the trail is light
+      if (Math.random() > 0.45) return;
+      particles.push({
+        x: e.clientX + (Math.random() - 0.5) * 8,
+        y: e.clientY + (Math.random() - 0.5) * 8,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: -Math.random() * 1 - 0.15,
+        life: 0,
+        max: 45 + Math.random() * 35,
+        r: 1.5 + Math.random() * 3,
+        hue: colors[Math.floor(Math.random() * colors.length)],
+        kind: Math.random() > 0.7 ? 'spark' : 'bubble',
+      });
+      if (particles.length > 70) particles.splice(0, particles.length - 70);
     };
 
     const onResize = () => {
@@ -83,7 +83,7 @@ export function CursorParticles() {
           particles.splice(i, 1);
           continue;
         }
-        ctx.globalAlpha = t * 0.85;
+        ctx.globalAlpha = t * 0.45;
         if (p.kind === 'bubble') {
           ctx.beginPath();
           ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
@@ -129,7 +129,8 @@ export function CursorParticles() {
     <canvas
       ref={ref}
       aria-hidden
-      className="pointer-events-none fixed inset-0 z-[60] mix-blend-screen"
+      className="pointer-events-none fixed inset-0 z-[60]"
+      style={{mixBlendMode: 'plus-lighter'}}
     />
   );
 }

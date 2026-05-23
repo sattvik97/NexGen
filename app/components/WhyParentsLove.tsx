@@ -1,4 +1,5 @@
 import {motion} from 'framer-motion';
+import {MagneticTilt} from '~/components/MagneticTilt';
 
 const PROMISES = [
   {
@@ -63,16 +64,19 @@ export function WhyParentsLove() {
               whileInView={{opacity: 1, y: 0}}
               viewport={{once: true, margin: '-80px'}}
               transition={{duration: 0.45, delay: i * 0.05, ease: 'easeOut'}}
-              className="rounded-3xl bg-white p-7 shadow-soft ring-1 ring-nexgen-ink/5"
             >
-              <span
-                className={`inline-flex size-12 items-center justify-center rounded-2xl text-2xl ${p.tint}`}
-                aria-hidden
-              >
-                {p.icon}
-              </span>
-              <h3 className="mt-5 text-xl font-extrabold">{p.title}</h3>
-              <p className="mt-2 text-nexgen-slate leading-relaxed">{p.body}</p>
+              <MagneticTilt intensity={0.7} scale={1.02} rounded="rounded-3xl">
+                <div className="rounded-3xl bg-white p-7 shadow-soft ring-1 ring-nexgen-ink/5">
+                  <span
+                    className={`inline-flex size-12 items-center justify-center rounded-2xl text-2xl ${p.tint}`}
+                    aria-hidden
+                  >
+                    {p.icon}
+                  </span>
+                  <h3 className="mt-5 text-xl font-extrabold">{p.title}</h3>
+                  <p className="mt-2 text-nexgen-slate leading-relaxed">{p.body}</p>
+                </div>
+              </MagneticTilt>
             </motion.li>
           ))}
         </ul>

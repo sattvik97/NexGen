@@ -4,7 +4,6 @@ import {
   Float,
   Sparkles,
   Stars,
-  Environment,
   RoundedBox,
   MeshDistortMaterial,
 } from '@react-three/drei';
@@ -24,7 +23,7 @@ export function ToyChestScene() {
       gl={{antialias: true, alpha: true}}
       style={{width: '100%', height: '100%'}}
     >
-      <color attach="background" args={['#00000000']} />
+      {/* transparent canvas — no background color; fog tints depth */}
       <fog attach="fog" args={['#fbe9d7', 9, 18]} />
       <ambientLight intensity={0.55} />
       <directionalLight
@@ -56,7 +55,6 @@ export function ToyChestScene() {
           fade
           speed={0.6}
         />
-        <Environment preset="sunset" />
       </Suspense>
     </Canvas>
   );

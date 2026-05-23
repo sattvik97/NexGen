@@ -17,7 +17,7 @@
     "@react-spring/web": "^9.7.5",
     "@react-three/drei": "^9.122.0",
     "@react-three/fiber": "^8.18.0",
-    "@shopify/hydrogen": "*2026.1.1",
+    "@shopify/hydrogen": "^2026.4.1",
     "framer-motion": "^11.18.0",
     "graphql": "^16.10.0",
     "graphql-tag": "^2.12.6",

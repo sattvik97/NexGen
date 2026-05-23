@@ -5,8 +5,20 @@
 
 @import 'tailwindcss';
 
+/* Tailwind v4 — enable class-based dark mode via the .dark selector on <html> */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
-  /* ---------- Brand colors ---------- */
+  /* ---------- Semantic surface tokens (auto-swap in .dark below) ---------- */
+  --color-surface: #ffffff;
+  --color-surface-2: #f8fafc;   /* page background */
+  --color-surface-3: #eef2ff;   /* subtle wash */
+  --color-fg: #0f172a;          /* primary text */
+  --color-fg-muted: #475569;    /* secondary text */
+  --color-border: rgba(15, 23, 42, 0.10);
+  --color-ring: rgba(15, 23, 42, 0.06);
+
+  /* ---------- Brand colors (kept consistent in both themes) ---------- */
   --color-nexgen-orange: #ff6b35;
   --color-nexgen-teal: #4ecdc4;
   --color-nexgen-purple: #6c63ff;
@@ -15,6 +27,8 @@
   --color-nexgen-slate: #334155;
   --color-nexgen-mist: #f8fafc;
   --color-nexgen-cloud: #eef2ff;
+  --color-nexgen-night: #0f172a;
+  --color-nexgen-cream: #fff8ee;
 
   /* ---------- Typography ---------- */
   --font-display: 'Poppins', ui-sans-serif, system-ui, sans-serif;
@@ -32,21 +46,99 @@
   --shadow-glow-purple: 0 20px 60px -15px rgba(108, 99, 255, 0.5);
 }
 
+/* ---------- Dark mode token overrides ---------- */
+.dark {
+  --color-surface: #0b1020;     /* deep midnight */
+  --color-surface-2: #060914;   /* page background */
+  --color-surface-3: #11172b;
+  --color-fg: #f1f5f9;
+  --color-fg-muted: #94a3b8;
+  --color-border: rgba(255, 255, 255, 0.10);
+  --color-ring: rgba(255, 255, 255, 0.06);
+
+  /* Brand variables stay visually bright on dark: lift their luminance slightly */
+  --color-nexgen-ink: #f1f5f9;          /* text-on-dark */
+  --color-nexgen-night: #060914;        /* darkest bg layer */
+  --color-nexgen-slate: #cbd5e1;
+  --color-nexgen-mist: #0b1020;
+  --color-nexgen-cloud: #11172b;
+  --color-nexgen-cream: #11172b;        /* announcement strip background */
+
+  /* Brighter glow halos in dark mode */
+  --shadow-glow-orange: 0 25px 80px -10px rgba(255, 107, 53, 0.75);
+  --shadow-glow-teal: 0 25px 80px -10px rgba(78, 205, 196, 0.75);
+  --shadow-glow-purple: 0 25px 80px -10px rgba(108, 99, 255, 0.75);
+  --shadow-soft: 0 12px 40px -8px rgba(0, 0, 0, 0.55);
+}
+
 /* ---------- Global base ---------- */
 @layer base {
   html {
     font-family: var(--font-sans);
-    color: var(--color-nexgen-ink);
-    background: var(--color-nexgen-mist);
+    color: var(--color-fg);
+    background: var(--color-surface-2);
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11', 'ss01';
+    color-scheme: light;
+    scroll-behavior: smooth;
+    overflow-x: hidden;
   }
+  html.dark {
+    color-scheme: dark;
+  }
+  body {
+    overscroll-behavior-y: none;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+  /* iOS safe-area aware bottom padding helper */
+  .pb-safe { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+
+  /* Custom scrollbar (Windows/Linux); macOS uses native overlay */
+  @supports not (-webkit-touch-callout: none) {
+    *::-webkit-scrollbar { width: 10px; height: 10px; }
+    *::-webkit-scrollbar-track { background: transparent; }
+    *::-webkit-scrollbar-thumb {
+      background: var(--color-border);
+      border-radius: 999px;
+      border: 2px solid transparent;
+      background-clip: padding-box;
+    }
+    *::-webkit-scrollbar-thumb:hover { background-color: var(--color-fg-muted); }
+  }
+  * { scrollbar-width: thin; scrollbar-color: var(--color-border) transparent; }
+
+  /* Focus ring — consistent across browsers/OSes */
+  :focus-visible {
+    outline: 2px solid var(--color-nexgen-orange);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  /* Selection */
+  ::selection {
+    background: var(--color-nexgen-orange);
+    color: #fff;
+  }
+
+  /* Fluid responsive base type */
+  html { font-size: clamp(15px, 0.85rem + 0.2vw, 17px); }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
     font-weight: 800;
     letter-spacing: -0.02em;
   }
+
+  img, picture, svg, video, canvas { max-width: 100%; height: auto; }
+
+  /* Smooth color transitions when toggling theme — limited to layout shells
+     to avoid interfering with hover effects, motion springs, transforms,
+     and animated decorations. */
+  html, body, main, header, footer, nav, aside { transition: background-color 0.35s ease, color 0.25s ease; }
 }
 
 /* ---------- Brand utilities ---------- */
@@ -109,12 +201,178 @@
     100% { background-position: 200% 50%; }
   }
 
+  /* Announcement marquee */
+  @keyframes nexgen-marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+  .marquee-track { animation: nexgen-marquee 38s linear infinite; will-change: transform; }
+  .marquee-track:hover { animation-play-state: paused; }
+
+  @keyframes nexgen-marquee-shimmer {
+    0%   { background-position: -100% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .animate-marquee-shimmer { animation: nexgen-marquee-shimmer 3.5s linear infinite; }
+
   @media (prefers-reduced-motion: reduce) {
     .animate-float,
     .animate-float-slow,
     .animate-orb,
-    .animate-drift {
+    .animate-drift,
+    .marquee-track,
+    .animate-marquee-shimmer {
       animation: none;
     }
   }
 }
+
+/* ============================================================== */
+/*  DARK MODE — auto-flip common backgrounds & rings              */
+/*  Saves having to add `dark:` to every component manually.       */
+/* ============================================================== */
+.dark .bg-white { background-color: var(--color-surface) !important; }
+/* Translucent white pills/cards used widely across the hero & sections */
+.dark .bg-white\/95 { background-color: rgba(15, 18, 36, 0.92) !important; }
+.dark .bg-white\/90 { background-color: rgba(15, 18, 36, 0.88) !important; }
+.dark .bg-white\/85 { background-color: rgba(15, 18, 36, 0.82) !important; }
+.dark .bg-white\/80 { background-color: rgba(15, 18, 36, 0.78) !important; }
+.dark .bg-white\/75 { background-color: rgba(255, 255, 255, 0.10) !important; }
+.dark .bg-white\/70 { background-color: rgba(255, 255, 255, 0.08) !important; }
+.dark .bg-white\/60 { background-color: rgba(255, 255, 255, 0.07) !important; }
+.dark .hover\:bg-white:hover { background-color: rgba(255, 255, 255, 0.14) !important; }
+.dark .ring-white\/60 { --tw-ring-color: rgba(255, 255, 255, 0.14); }
+.dark .ring-white\/70 { --tw-ring-color: rgba(255, 255, 255, 0.18); }
+.dark .bg-nexgen-mist { background-color: var(--color-surface-2) !important; }
+.dark .bg-nexgen-cloud { background-color: var(--color-surface-3) !important; }
+.dark .bg-nexgen-cream { background-color: var(--color-surface-3) !important; }
+
+/* Product image wrappers — keep a soft tinted surface so transparent-PNG
+   toy renders stay visible in dark mode. */
+.dark .aspect-square.bg-nexgen-cream,
+.dark [class*='aspect-'][class*='bg-nexgen-cream'] {
+  background-color: #f3e9d6 !important;
+}
+
+/* Borders / rings that were nexgen-night/10 etc. — boost contrast on dark */
+.dark .ring-nexgen-night\/5 { --tw-ring-color: rgba(255, 255, 255, 0.06); }
+.dark .ring-nexgen-night\/10 { --tw-ring-color: rgba(255, 255, 255, 0.10); }
+.dark .ring-nexgen-ink\/5 { --tw-ring-color: rgba(255, 255, 255, 0.06); }
+.dark .border-nexgen-night\/10 { border-color: rgba(255, 255, 255, 0.10); }
+
+/* Text that was dark on light surfaces */
+.dark .text-nexgen-night { color: var(--color-fg); }
+.dark .text-nexgen-ink { color: var(--color-fg); }
+.dark .text-nexgen-slate { color: var(--color-fg-muted); }
+
+/* Translucent dark text helpers used widely */
+.dark .text-nexgen-night\/85 { color: rgba(241, 245, 249, 0.92); }
+.dark .text-nexgen-night\/80 { color: rgba(241, 245, 249, 0.88); }
+.dark .text-nexgen-night\/75 { color: rgba(241, 245, 249, 0.85); }
+.dark .text-nexgen-night\/70 { color: rgba(241, 245, 249, 0.80); }
+.dark .text-nexgen-night\/65 { color: rgba(241, 245, 249, 0.75); }
+.dark .text-nexgen-night\/60 { color: rgba(241, 245, 249, 0.70); }
+.dark .text-nexgen-night\/55 { color: rgba(241, 245, 249, 0.66); }
+.dark .text-nexgen-night\/45 { color: rgba(241, 245, 249, 0.60); }
+.dark .placeholder\:text-nexgen-night\/45::placeholder { color: rgba(241, 245, 249, 0.60); }
+
+/* Soft scrolling background tints (gradient sections) */
+.dark .from-nexgen-cream { --tw-gradient-from: var(--color-surface-3); }
+.dark .to-white { --tw-gradient-to: var(--color-surface); }
+
+/* Sticky header backdrop */
+.dark .bg-white\/95 { background-color: rgba(11, 16, 32, 0.85) !important; }
+
+/* Lift MagneticTilt glow halos so cards feel alive on dark backgrounds */
+.dark .shadow-glow-orange,
+.dark .shadow-glow-teal,
+.dark .shadow-glow-purple { filter: brightness(1.15) saturate(1.1); }
+
+/* ============================================================== */
+/*  DARK MODE — SPECIAL EFFECTS                                    */
+/* ============================================================== */
+
+/* Twinkling star-field overlay (fixed, full-viewport, behind content) */
+.dark body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background-image:
+    radial-gradient(2px 2px at 20% 30%, rgba(255,230,109,0.9), transparent 50%),
+    radial-gradient(1.5px 1.5px at 70% 60%, rgba(78,205,196,0.85), transparent 50%),
+    radial-gradient(1px 1px at 40% 80%, rgba(255,255,255,0.85), transparent 50%),
+    radial-gradient(1.5px 1.5px at 85% 20%, rgba(108,99,255,0.85), transparent 50%),
+    radial-gradient(2px 2px at 10% 70%, rgba(255,107,53,0.85), transparent 50%),
+    radial-gradient(1px 1px at 60% 15%, rgba(255,255,255,0.85), transparent 50%),
+    radial-gradient(1.5px 1.5px at 30% 50%, rgba(255,230,109,0.8), transparent 50%),
+    radial-gradient(1px 1px at 95% 85%, rgba(255,255,255,0.85), transparent 50%);
+  background-size: 1200px 900px;
+  background-repeat: repeat;
+  animation: nexgen-twinkle 6s ease-in-out infinite alternate, nexgen-starfield-drift 90s linear infinite;
+  opacity: 0.85;
+}
+
+/* Aurora ribbon — soft moving brand glow behind everything */
+.dark body::after {
+  content: '';
+  position: fixed;
+  inset: -20%;
+  pointer-events: none;
+  z-index: -1;
+  background:
+    radial-gradient(40% 30% at 20% 30%, rgba(255,107,53,0.20), transparent 60%),
+    radial-gradient(35% 25% at 75% 25%, rgba(108,99,255,0.22), transparent 60%),
+    radial-gradient(40% 30% at 60% 80%, rgba(78,205,196,0.20), transparent 60%);
+  filter: blur(60px);
+  animation: nexgen-aurora 18s ease-in-out infinite alternate;
+}
+
+@keyframes nexgen-twinkle {
+  0%, 100% { opacity: 0.65; }
+  50% { opacity: 1; }
+}
+@keyframes nexgen-starfield-drift {
+  from { background-position: 0 0; }
+  to { background-position: 1200px 900px; }
+}
+@keyframes nexgen-aurora {
+  0%   { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50%  { transform: translate3d(2%, -1%, 0) rotate(2deg); }
+  100% { transform: translate3d(-1%, 2%, 0) rotate(-2deg); }
+}
+
+/* Promote app content above the body pseudo-elements without breaking
+   `position: fixed` overlays like the cursor-particles canvas. We give
+   body its own stacking context via `isolation` instead of reseting the
+   `position` of every child. */
+.dark body { isolation: isolate; }
+
+/* Dark-mode subtle inner glow on bordered cards */
+.dark .rounded-3xl.bg-white,
+.dark .rounded-3xl.ring-1,
+.dark .rounded-2xl.ring-1 {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 12px 40px -16px rgba(0, 0, 0, 0.6);
+}
+
+/* Reduce motion respect */
+@media (prefers-reduced-motion: reduce) {
+  .dark body::before,
+  .dark body::after {
+    animation: none;
+  }
+}
+
+/* Skeleton-shipped raw CSS classes */
+.dark .mock-shop-notice {
+  background: var(--color-surface);
+  border-color: rgba(255, 255, 255, 0.10);
+  color: var(--color-fg);
+}
+.dark .mock-shop-notice code,
+.dark .mock-shop-notice footer { background: rgba(255, 255, 255, 0.08); }
+.dark .footer { background: var(--color-surface); color: var(--color-fg); }
+.dark .header { background: var(--color-surface); color: var(--color-fg); }

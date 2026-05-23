@@ -19,6 +19,26 @@ export default async function handleRequest(
       checkoutDomain: context.env.PUBLIC_CHECKOUT_DOMAIN,
       storeDomain: context.env.PUBLIC_STORE_DOMAIN,
     },
+    // Allow product imagery from the live nexgen.toys Shopify CDN
+    // plus general Shopify CDNs and data: URIs for inline SVGs.
+    imgSrc: [
+      "'self'",
+      'data:',
+      'blob:',
+      'https://nexgen.toys',
+      'https://cdn.shopify.com',
+      'https://*.shopify.com',
+      'https://shopify.com',
+    ],
+    // Google Fonts stylesheet
+    styleSrc: [
+      "'self'",
+      "'unsafe-inline'",
+      'https://fonts.googleapis.com',
+      'https://cdn.shopify.com',
+    ],
+    // Google Fonts font files
+    fontSrc: ["'self'", 'data:', 'https://fonts.gstatic.com'],
   });
 
   const body = await renderToReadableStream(

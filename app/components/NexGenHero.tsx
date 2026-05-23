@@ -11,7 +11,7 @@ import {
   type MotionValue,
 } from 'framer-motion';
 import {MascotRobot} from './hero/MascotRobot';
-import {CursorParticles} from './hero/CursorParticles';
+// CursorParticles is now mounted in app/root.tsx (site-wide)
 
 // 3D scene is loaded strictly on the client — Three.js/R3F use CJS internals
 // that workerd/MiniOxygen cannot evaluate during SSR.
@@ -30,7 +30,8 @@ export function NexGenHero() {
   const reduce = useReducedMotion();
   const heroRef = useRef<HTMLElement>(null);
 
-  // R3F is browser-only; load the module after hydration.
+  // R3F is browser-only; load the module after hydration. Skip on tiny phones
+  // (<360px) where the 3D scene yields little value for the bytes.
   const [Scene, setScene] = useState<SceneCmp | null>(null);
   useEffect(() => {
     let alive = true;
@@ -42,6 +43,16 @@ export function NexGenHero() {
     };
   }, []);
 
+  // Skip mouse parallax + cursor particles on touch devices.
+  const [isTouch, setIsTouch] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(hover: none), (pointer: coarse)');
+    const update = () => setIsTouch(mq.matches);
+    update();
+    mq.addEventListener?.('change', update);
+    return () => mq.removeEventListener?.('change', update);
+  }, []);
+
   // Mouse parallax (-1..1)
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
@@ -49,6 +60,7 @@ export function NexGenHero() {
   const smy = useSpring(my, {stiffness: 60, damping: 18, mass: 0.4});
 
   useEffect(() => {
+    if (isTouch) return;
     const handler = (e: globalThis.MouseEvent) => {
       const w = window.innerWidth;
       const h = window.innerHeight;
@@ -57,7 +69,7 @@ export function NexGenHero() {
     };
     window.addEventListener('mousemove', handler);
     return () => window.removeEventListener('mousemove', handler);
-  }, [mx, my]);
+  }, [mx, my, isTouch]);
 
   // Scroll-driven cinematic exit
   const {scrollYProgress} = useScroll({
@@ -73,7 +85,7 @@ export function NexGenHero() {
     <motion.section
       ref={heroRef}
       style={{scale: heroScale, opacity: heroOpacity, y: heroY}}
-      className="relative isolate w-full h-screen min-h-[720px] overflow-hidden text-nexgen-night"
+      className="relative isolate w-full min-h-[100svh] lg:min-h-screen overflow-hidden text-nexgen-night"
     >
       {/* ===================== LAYER 1 — ANIMATED SKY ===================== */}
       <motion.div aria-hidden style={{y: skyY}} className="absolute inset-0 -z-30">
@@ -84,10 +96,10 @@ export function NexGenHero() {
       <ParallaxToyField mx={smx} my={smy} />
 
       {/* ====================== CURSOR PARTICLES ========================== */}
-      {!reduce && <CursorParticles />}
+      {/* CursorParticles is now mounted globally in app/root.tsx */}
 
       {/* ============================ CONTENT ============================ */}
-      <div className="relative z-10 mx-auto w-full max-w-7xl h-full px-6 lg:px-10 grid lg:grid-cols-12 gap-8 items-center pt-24 pb-12">
+      <div className="relative z-10 mx-auto w-full max-w-7xl min-h-[100svh] lg:min-h-screen px-5 sm:px-6 lg:px-10 grid lg:grid-cols-12 gap-6 lg:gap-8 items-center pt-20 sm:pt-24 pb-24 sm:pb-28 lg:pb-32">
         {/* ---------- LEFT: COPY ---------- */}
         <div className="lg:col-span-7 text-center lg:text-left">
           {/* Badge */}
@@ -114,7 +126,7 @@ export function NexGenHero() {
           </motion.div>
 
           {/* Headline */}
-          <h1 className="mt-7 font-display font-black leading-[1.02] text-5xl sm:text-6xl lg:text-7xl xl:text-[5.25rem] tracking-tight">
+          <h1 className="mt-5 sm:mt-7 font-display font-black leading-[1.02] text-[2.5rem] sm:text-6xl lg:text-7xl xl:text-[5.25rem] tracking-tight">
             {HEADLINE.map((word, i) => (
               <motion.span
                 key={word}
@@ -131,8 +143,8 @@ export function NexGenHero() {
           </h1>
 
           {/* Typewriter sub */}
-          <div className="mt-6 max-w-xl mx-auto lg:mx-0">
-            <Typewriter text={SUBHEAD} delay={1.1} className="text-lg text-nexgen-night/75" />
+          <div className="mt-5 sm:mt-6 max-w-xl mx-auto lg:mx-0">
+            <Typewriter text={SUBHEAD} delay={1.1} className="text-base sm:text-lg text-nexgen-night/75" />
           </div>
 
           {/* CTAs */}
@@ -140,7 +152,7 @@ export function NexGenHero() {
             initial={{opacity: 0, y: 16}}
             animate={{opacity: 1, y: 0}}
             transition={{delay: 1.6, duration: 0.6}}
-            className="mt-9 flex flex-wrap gap-4 justify-center lg:justify-start"
+            className="relative z-20 mt-7 sm:mt-9 flex flex-wrap gap-3 sm:gap-4 justify-center lg:justify-start"
           >
             <MagneticButton to="/collections" variant="primary">
               <SparkleIcon /> Shop Adventure
@@ -155,17 +167,28 @@ export function NexGenHero() {
             initial={{opacity: 0, y: 20}}
             animate={{opacity: 1, y: 0}}
             transition={{delay: 2, duration: 0.7}}
-            className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl mx-auto lg:mx-0"
+            className="mt-8 sm:mt-10 grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 max-w-2xl mx-auto lg:mx-0"
           >
             <StatCard value={50000} suffix="+" label="Happy Families" tint="orange" />
             <StatCard value={100000} suffix="+" label="Toys Delivered" tint="teal" />
             <StatCard value={4.9} decimals={1} suffix="★" label="Parent Rating" tint="yellow" />
             <StatCard value={500} suffix="+" label="Educational Toys" tint="purple" />
           </motion.div>
+          {/* Mobile trust strip (replaces hidden floating cards) */}
+          <motion.div
+            initial={{opacity: 0, y: 10}}
+            animate={{opacity: 1, y: 0}}
+            transition={{delay: 2.3, duration: 0.6}}
+            className="sm:hidden mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[11px] font-semibold text-nexgen-night/70"
+          >
+            <span className="inline-flex items-center gap-1.5"><span className="text-nexgen-teal">●</span> BIS Certified</span>
+            <span className="inline-flex items-center gap-1.5"><span className="text-nexgen-orange">●</span> Ships 24h</span>
+            <span className="inline-flex items-center gap-1.5"><span className="text-nexgen-purple">●</span> 30-day Returns</span>
+          </motion.div>
         </div>
 
         {/* ---------- RIGHT: 3D SCENE + MASCOT ---------- */}
-        <div className="lg:col-span-5 relative h-[420px] sm:h-[520px] lg:h-[640px]">
+        <div className="lg:col-span-5 relative h-[300px] sm:h-[460px] lg:h-[640px] order-first lg:order-none">
           <motion.div
             initial={{opacity: 0, scale: 0.9}}
             animate={{opacity: 1, scale: 1}}
@@ -179,7 +202,7 @@ export function NexGenHero() {
             )}
           </motion.div>
 
-          <MascotRobot className="absolute -left-2 sm:-left-8 bottom-0 w-28 sm:w-36 lg:w-44 pointer-events-none select-none" />
+          <MascotRobot className="absolute left-1 sm:-left-8 bottom-0 w-20 sm:w-36 lg:w-44 pointer-events-none select-none" />
 
           <FloatingTrust
             label="100% Safe"
@@ -213,7 +236,7 @@ export function NexGenHero() {
         initial={{opacity: 0}}
         animate={{opacity: 1}}
         transition={{delay: 2.4, duration: 0.6}}
-        className="absolute bottom-5 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1 text-xs uppercase tracking-[0.25em] text-nexgen-night/60"
+        className="hidden sm:flex absolute bottom-5 left-1/2 -translate-x-1/2 z-10 flex-col items-center gap-1 text-xs uppercase tracking-[0.25em] text-nexgen-night/60"
       >
         <span>Scroll to explore</span>
         <motion.div
@@ -234,7 +257,7 @@ function AnimatedSky() {
   return (
     <div className="absolute inset-0">
       <motion.div
-        className="absolute inset-0"
+        className="absolute inset-0 dark:opacity-0 transition-opacity duration-700"
         animate={{
           background: [
             'linear-gradient(180deg,#FFE8D6 0%,#FFF6E5 38%,#E8F8FF 100%)',
@@ -244,7 +267,19 @@ function AnimatedSky() {
         }}
         transition={{duration: 18, repeat: Infinity, ease: 'easeInOut'}}
       />
-      {/* Sun rays */}
+      {/* Night-sky overlay (only visible in dark mode) */}
+      <motion.div
+        className="absolute inset-0 opacity-0 dark:opacity-100 transition-opacity duration-700"
+        animate={{
+          background: [
+            'linear-gradient(180deg,#05060f 0%,#0b1029 38%,#1a0b2e 100%)',
+            'linear-gradient(180deg,#070920 0%,#101637 38%,#23103c 100%)',
+            'linear-gradient(180deg,#05060f 0%,#0b1029 38%,#1a0b2e 100%)',
+          ],
+        }}
+        transition={{duration: 18, repeat: Infinity, ease: 'easeInOut'}}
+      />
+      {/* Sun rays (sun in day, full moon in night) */}
       <motion.div
         className="absolute -top-32 -right-32 w-[36rem] h-[36rem] rounded-full"
         style={{
@@ -286,9 +321,9 @@ function AnimatedSky() {
       })}
 
       {/* Clouds */}
-      <Cloud className="top-[14%] opacity-80" duration={48} />
-      <Cloud className="top-[34%] scale-75 opacity-60" duration={62} delay={-20} />
-      <Cloud className="top-[60%] scale-90 opacity-70" duration={70} delay={-40} />
+      <Cloud className="top-[14%] opacity-80 dark:opacity-20" duration={48} />
+      <Cloud className="top-[34%] scale-75 opacity-60 dark:opacity-10" duration={62} delay={-20} />
+      <Cloud className="top-[60%] scale-90 opacity-70 dark:opacity-15" duration={70} delay={-40} />
 
       {/* Paper airplane */}
       <PaperPlane />
@@ -328,7 +363,7 @@ function PaperPlane() {
   return (
     <motion.div
       aria-hidden
-      className="absolute"
+      className="absolute dark:opacity-40"
       initial={{x: '-10vw', y: '20vh', rotate: 10}}
       animate={{x: '110vw', y: ['20vh', '14vh', '22vh'], rotate: [10, -6, 10]}}
       transition={{duration: 22, repeat: Infinity, ease: 'linear'}}
@@ -387,7 +422,7 @@ function ParallaxToyField({
   ];
 
   return (
-    <div aria-hidden className="pointer-events-none absolute inset-0 -z-20">
+    <div aria-hidden className="pointer-events-none absolute inset-0 -z-20 hidden sm:block">
       {toys.map((t, i) => (
         <ParallaxToy key={i} {...t} mx={mx} my={my} index={i} />
       ))}
@@ -568,7 +603,7 @@ function MagneticButton({
   const styles =
     variant === 'primary'
       ? 'text-white nexgen-gradient shadow-[0_10px_30px_-8px_rgba(255,107,53,0.6)] hover:shadow-[0_18px_40px_-8px_rgba(255,107,53,0.7)]'
-      : 'bg-white/70 backdrop-blur-md text-nexgen-night ring-1 ring-nexgen-night/15 hover:ring-nexgen-purple/40 hover:bg-white';
+      : 'bg-white/70 backdrop-blur-md text-nexgen-night dark:text-white ring-1 ring-nexgen-night/15 dark:ring-white/20 hover:ring-nexgen-purple/40 hover:bg-white dark:hover:bg-white/15';
 
   return (
     <motion.div style={{x: sx, y: sy}} className="inline-block">

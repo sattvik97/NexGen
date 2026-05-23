@@ -1,130 +1,98 @@
-import {motion} from 'framer-motion';
 import {Link} from 'react-router';
+import {motion} from 'framer-motion';
+import {NEXGEN_CATEGORIES} from '~/data/nexgenCatalog';
+import {MagneticTilt} from '~/components/MagneticTilt';
 
-type Category = {
-  title: string;
-  handle: string;
-  emoji: string;
-  tint: string; // tailwind bg tint
-  glow: string; // hover glow class
-  blurb: string;
-};
-
-const CATEGORIES: Category[] = [
-  {
-    title: 'RC Toys',
-    handle: 'rc-toys',
-    emoji: '🏎️',
-    tint: 'from-nexgen-orange/20 to-nexgen-orange/5',
-    glow: 'hover:glow-orange',
-    blurb: 'Speed, control, full-throttle fun',
-  },
-  {
-    title: 'Educational',
-    handle: 'educational',
-    emoji: '📚',
-    tint: 'from-nexgen-purple/20 to-nexgen-purple/5',
-    glow: 'hover:glow-purple',
-    blurb: 'Learn while you play',
-  },
-  {
-    title: 'Plush Toys',
-    handle: 'plush',
-    emoji: '🧸',
-    tint: 'from-nexgen-yellow/30 to-nexgen-yellow/5',
-    glow: 'hover:glow-orange',
-    blurb: 'Soft cuddles, big smiles',
-  },
-  {
-    title: 'STEM Learning',
-    handle: 'stem',
-    emoji: '🔬',
-    tint: 'from-nexgen-teal/20 to-nexgen-teal/5',
-    glow: 'hover:glow-teal',
-    blurb: 'Build, code, experiment',
-  },
-  {
-    title: 'Outdoor',
-    handle: 'outdoor',
-    emoji: '🛴',
-    tint: 'from-nexgen-orange/20 to-nexgen-purple/10',
-    glow: 'hover:glow-purple',
-    blurb: 'Run, ride, explore',
-  },
-  {
-    title: 'Games & Puzzles',
-    handle: 'games',
-    emoji: '🧩',
-    tint: 'from-nexgen-purple/20 to-nexgen-teal/10',
-    glow: 'hover:glow-teal',
-    blurb: 'Think it through together',
-  },
-];
-
-const card = {
-  hidden: {opacity: 0, y: 28},
-  show: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: {duration: 0.5, delay: i * 0.06, ease: 'easeOut'},
-  }),
-};
-
+/**
+ * Real category grid mirroring nexgen.toys collections.
+ * Each card links to /collections/{handle} — works against linked stores.
+ */
 export function FeaturedCategories() {
   return (
-    <section className="relative py-24 lg:py-32">
-      <div className="mx-auto max-w-7xl px-6 lg:px-10">
-        <div className="text-center max-w-2xl mx-auto">
-          <span className="text-xs font-semibold uppercase tracking-widest text-nexgen-purple">
-            Featured Categories
+    <section className="relative py-20 sm:py-28">
+      <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-10">
+        {/* Section header */}
+        <motion.div
+          initial={{opacity: 0, y: 20}}
+          whileInView={{opacity: 1, y: 0}}
+          viewport={{once: true, amount: 0.3}}
+          transition={{duration: 0.6}}
+          className="text-center max-w-2xl mx-auto"
+        >
+          <span className="inline-flex items-center gap-2 rounded-full bg-nexgen-purple/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-nexgen-purple">
+            <span className="size-1.5 rounded-full bg-nexgen-orange" />
+            Shop by Category
           </span>
-          <h2 className="mt-3 text-4xl sm:text-5xl">
-            Pick a world to <span className="text-gradient">explore</span>
+          <h2 className="mt-4 font-display font-black text-4xl sm:text-5xl tracking-tight text-nexgen-night">
+            Curated collections for{' '}
+            <span className="text-gradient">every kind of play</span>
           </h2>
-          <p className="mt-4 text-nexgen-slate text-lg">
-            Curated by parents, loved by kids. Every category is hand-tested for
-            safety, joy, and a touch of magic.
+          <p className="mt-3 text-nexgen-night/70">
+            From speed-demon RC cars to cuddle-ready plush — discover NexGen's
+            full toy universe.
           </p>
-        </div>
+        </motion.div>
 
-        <ul className="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {CATEGORIES.map((cat, i) => (
-            <motion.li
+        {/* Grid */}
+        <div className="mt-12 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-7 lg:gap-8">
+          {NEXGEN_CATEGORIES.map((cat, i) => (
+            <motion.div
               key={cat.handle}
-              custom={i}
-              initial="hidden"
-              whileInView="show"
-              viewport={{once: true, margin: '-80px'}}
-              variants={card}
+              initial={{opacity: 0, y: 30}}
+              whileInView={{opacity: 1, y: 0}}
+              viewport={{once: true, amount: 0.2}}
+              transition={{delay: (i % 4) * 0.07, duration: 0.5}}
             >
+              <MagneticTilt intensity={0.9} scale={1.02} rounded="rounded-3xl">
               <Link
                 to={`/collections/${cat.handle}`}
-                className={`group relative block overflow-hidden rounded-3xl bg-gradient-to-br ${cat.tint} ring-1 ring-nexgen-ink/5 p-8 h-64 transition-transform duration-300 hover:-translate-y-2 ${cat.glow}`}
+                className="group relative block overflow-hidden rounded-3xl bg-white ring-1 ring-nexgen-night/5 shadow-sm hover:shadow-2xl transition-all duration-300 will-change-transform"
               >
-                <div className="absolute -bottom-6 -right-4 text-[10rem] leading-none opacity-90 transition-transform duration-500 group-hover:rotate-6 group-hover:scale-110">
-                  {cat.emoji}
-                </div>
+                {/* gradient wash */}
+                <div
+                  aria-hidden
+                  className={`absolute inset-0 bg-gradient-to-br ${cat.tint} opacity-90 transition-opacity duration-300 group-hover:opacity-100`}
+                />
+                {/* glow ring on hover */}
+                <div
+                  aria-hidden
+                  className={`absolute inset-0 ${cat.glow} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
+                />
 
-                <div className="relative">
-                  <h3 className="text-2xl font-extrabold">{cat.title}</h3>
-                  <p className="mt-2 text-sm font-medium text-nexgen-slate max-w-[60%]">
-                    {cat.blurb}
-                  </p>
-                </div>
-
-                <div className="absolute bottom-6 left-8 inline-flex items-center gap-2 text-sm font-semibold text-nexgen-ink/80">
-                  Shop {cat.title}
-                  <span
-                    className="inline-block transition-transform group-hover:translate-x-1"
-                    aria-hidden
+                <div className="relative p-5 sm:p-6 flex flex-col gap-3 min-h-[180px] sm:min-h-[200px]">
+                  <motion.div
+                    className="text-5xl sm:text-6xl leading-none drop-shadow-sm"
+                    whileHover={{scale: 1.15, rotate: -6}}
+                    transition={{type: 'spring', stiffness: 200}}
                   >
-                    →
-                  </span>
+                    {cat.emoji}
+                  </motion.div>
+                  <div className="mt-auto">
+                    <h3 className="font-display font-extrabold text-lg sm:text-xl text-nexgen-night">
+                      {cat.title}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-nexgen-night/65 line-clamp-2">
+                      {cat.blurb}
+                    </p>
+                    <span className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-nexgen-orange group-hover:gap-2 transition-all">
+                      Explore <span aria-hidden>→</span>
+                    </span>
+                  </div>
                 </div>
               </Link>
-            </motion.li>
+              </MagneticTilt>
+            </motion.div>
           ))}
-        </ul>
+        </div>
+
+        <div className="mt-10 text-center">
+          <Link
+            to="/collections"
+            className="inline-flex items-center gap-2 rounded-full bg-nexgen-night text-white px-6 py-3 font-semibold hover:bg-nexgen-night/90 transition"
+          >
+            View all collections <span aria-hidden>→</span>
+          </Link>
+        </div>
       </div>
     </section>
   );
