@@ -141,6 +141,122 @@
   html, body, main, header, footer, nav, aside { transition: background-color 0.35s ease, color 0.25s ease; }
 }
 
+/* ---------- Account pane (scoped defaults for /account/* child routes) ---------- */
+.account-pane h2 {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.5rem;
+  letter-spacing: -0.01em;
+  color: var(--color-nexgen-night);
+  margin: 0 0 0.5rem;
+}
+:where(.dark) .account-pane h2 { color: #fff; }
+.account-pane h3 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--color-nexgen-night);
+  margin: 1rem 0 0.5rem;
+}
+:where(.dark) .account-pane h3 { color: #fff; }
+.account-pane p { color: rgba(15, 23, 42, 0.75); margin: 0.25rem 0; }
+:where(.dark) .account-pane p { color: rgb(203, 213, 225); }
+.account-pane address { font-style: normal; color: rgba(15, 23, 42, 0.75); }
+:where(.dark) .account-pane address { color: rgb(203, 213, 225); }
+.account-pane label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(15, 23, 42, 0.6);
+  margin: 0.75rem 0 0.35rem;
+}
+:where(.dark) .account-pane label { color: rgb(148, 163, 184); }
+.account-pane legend {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-nexgen-purple);
+  margin-bottom: 0.5rem;
+}
+.account-pane fieldset { border: 0; padding: 0; margin: 0; }
+.account-pane input[type="text"],
+.account-pane input[type="email"],
+.account-pane input[type="tel"],
+.account-pane input[type="search"],
+.account-pane input[type="password"],
+.account-pane input:not([type]),
+.account-pane select,
+.account-pane textarea {
+  width: 100%;
+  background: #f8fafc;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-radius: 0.75rem;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.95rem;
+  color: var(--color-nexgen-night);
+  transition: border-color 0.2s, background 0.2s;
+}
+:where(.dark) .account-pane input,
+:where(.dark) .account-pane select,
+:where(.dark) .account-pane textarea {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+.account-pane input:focus, .account-pane select:focus, .account-pane textarea:focus {
+  outline: none;
+  border-color: var(--color-nexgen-purple);
+  background: #fff;
+}
+:where(.dark) .account-pane input:focus { background: rgba(255,255,255,0.08); }
+.account-pane button[type="submit"],
+.account-pane button:not(.reset) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  padding: 0.6rem 1.25rem;
+  font-weight: 700;
+  font-size: 0.875rem;
+  background: linear-gradient(90deg, var(--color-nexgen-orange), var(--color-nexgen-purple));
+  color: #fff;
+  margin: 0.75rem 0.5rem 0 0;
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+  border: 0;
+  cursor: pointer;
+}
+.account-pane button:hover { transform: scale(1.02); box-shadow: 0 8px 22px -8px rgba(108, 99, 255, 0.5); }
+.account-pane button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+.account-pane button[formMethod="DELETE"],
+.account-pane button[formmethod="DELETE"] {
+  background: transparent;
+  color: #dc2626;
+  border: 1px solid rgba(220, 38, 38, 0.3);
+}
+.account-pane button[formMethod="DELETE"]:hover,
+.account-pane button[formmethod="DELETE"]:hover {
+  background: rgba(220, 38, 38, 0.08);
+  box-shadow: none;
+}
+.account-pane a { color: var(--color-nexgen-purple); font-weight: 600; }
+.account-pane a:hover { color: var(--color-nexgen-orange); }
+.account-pane table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+.account-pane th, .account-pane td { padding: 0.65rem 0.5rem; text-align: left; border-bottom: 1px solid rgba(15, 23, 42, 0.08); font-size: 0.9rem; }
+:where(.dark) .account-pane th, :where(.dark) .account-pane td { border-color: rgba(255, 255, 255, 0.08); }
+.account-pane th { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(15, 23, 42, 0.55); font-weight: 700; }
+:where(.dark) .account-pane th { color: rgb(148, 163, 184); }
+.account-pane mark { background: rgba(220, 38, 38, 0.1); color: #dc2626; padding: 0.2rem 0.5rem; border-radius: 0.5rem; }
+.account-pane hr { border: 0; border-top: 1px dashed rgba(15, 23, 42, 0.15); margin: 1.5rem 0; }
+:where(.dark) .account-pane hr { border-color: rgba(255, 255, 255, 0.15); }
+.account-pane .order-search-form { display: block; margin-bottom: 1.5rem; }
+.account-pane .order-search-inputs { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.account-pane .order-search-inputs input { flex: 1 1 200px; }
+.account-pane .order-search-buttons { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+
 /* ---------- Brand utilities ---------- */
 @layer utilities {
   .nexgen-gradient {

@@ -15,7 +15,7 @@ import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 
 export const meta: Route.MetaFunction = ({data}) => {
   return [
-    {title: `Hydrogen | ${data?.product.title ?? ''}`},
+    {title: `${data?.product.title ?? 'Product'} | NexGen Toys`},
     {
       rel: 'canonical',
       href: `/products/${data?.product.handle}`,
@@ -95,31 +95,69 @@ export default function Product() {
     selectedOrFirstAvailableVariant: selectedVariant,
   });
 
-  const {title, descriptionHtml} = product;
+  const {title, descriptionHtml, vendor} = product;
 
   return (
-    <div className="product">
-      <ProductImage image={selectedVariant?.image} />
-      <div className="product-main">
-        <h1>{title}</h1>
-        <ProductPrice
-          price={selectedVariant?.price}
-          compareAtPrice={selectedVariant?.compareAtPrice}
-        />
-        <br />
-        <ProductForm
-          productOptions={productOptions}
-          selectedVariant={selectedVariant}
-        />
-        <br />
-        <br />
-        <p>
-          <strong>Description</strong>
-        </p>
-        <br />
-        <div dangerouslySetInnerHTML={{__html: descriptionHtml}} />
-        <br />
+    <div className="bg-nexgen-mist dark:bg-[#070b1a]">
+      <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-10 py-8 sm:py-12">
+        {/* Breadcrumb */}
+        <nav aria-label="Breadcrumb" className="mb-6 text-xs sm:text-sm text-nexgen-night/60 dark:text-slate-400">
+          <ol className="flex flex-wrap items-center gap-1.5">
+            <li><a href="/" className="hover:text-nexgen-orange transition">Home</a></li>
+            <li aria-hidden>/</li>
+            <li><a href="/collections" className="hover:text-nexgen-orange transition">Catalog</a></li>
+            <li aria-hidden>/</li>
+            <li className="text-nexgen-night dark:text-white font-semibold truncate max-w-[40ch]">{title}</li>
+          </ol>
+        </nav>
+
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+          {/* Gallery */}
+          <div className="lg:sticky lg:top-[180px]">
+            <ProductImage image={selectedVariant?.image} />
+          </div>
+
+          {/* Info card */}
+          <div className="rounded-3xl bg-white dark:bg-[#0d1326] ring-1 ring-nexgen-night/5 dark:ring-white/10 shadow-xl shadow-nexgen-night/5 p-6 sm:p-8 lg:p-10">
+            {vendor && (
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-nexgen-purple">{vendor}</p>
+            )}
+            <h1 className="mt-1 font-display font-black text-3xl sm:text-4xl lg:text-5xl leading-tight tracking-tight text-nexgen-night dark:text-white">
+              {title}
+            </h1>
+            <div className="mt-4 text-2xl sm:text-3xl font-display font-black text-nexgen-night dark:text-white">
+              <ProductPrice
+                price={selectedVariant?.price}
+                compareAtPrice={selectedVariant?.compareAtPrice}
+              />
+            </div>
+
+            {/* Trust badges */}
+            <div className="mt-5 flex flex-wrap gap-2 text-[11px] font-semibold">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-nexgen-teal/10 dark:bg-nexgen-teal/15 text-nexgen-teal px-3 py-1"><span aria-hidden>🛡️</span> BIS Certified</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-nexgen-orange/10 dark:bg-nexgen-orange/15 text-nexgen-orange px-3 py-1"><span aria-hidden>🚚</span> Ships in 24h</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-nexgen-purple/10 dark:bg-nexgen-purple/15 text-nexgen-purple px-3 py-1"><span aria-hidden>↩️</span> 30-Day Returns</span>
+            </div>
+
+            <div className="mt-6">
+              <ProductForm
+                productOptions={productOptions}
+                selectedVariant={selectedVariant}
+              />
+            </div>
+
+            {/* Description */}
+            <div className="mt-8 pt-6 border-t border-nexgen-night/10 dark:border-white/10">
+              <h2 className="font-display font-black uppercase tracking-wider text-sm text-nexgen-night/60 dark:text-slate-400">Description</h2>
+              <div
+                className="mt-3 prose prose-sm sm:prose-base max-w-none text-nexgen-night/80 dark:text-slate-300 [&_strong]:text-nexgen-night dark:[&_strong]:text-white [&_a]:text-nexgen-orange [&_a]:underline"
+                dangerouslySetInnerHTML={{__html: descriptionHtml}}
+              />
+            </div>
+          </div>
+        </div>
       </div>
+
       <Analytics.ProductView
         data={{
           products: [

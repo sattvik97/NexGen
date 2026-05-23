@@ -3,7 +3,7 @@ import type {Route} from './+types/pages.$handle';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 
 export const meta: Route.MetaFunction = ({data}) => {
-  return [{title: `Hydrogen | ${data?.page.title ?? ''}`}];
+  return [{title: `${data?.page.title ?? 'Page'} | NexGen Toys`}];
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -58,12 +58,20 @@ export default function Page() {
   const {page} = useLoaderData<typeof loader>();
 
   return (
-    <div className="page">
-      <header>
-        <h1>{page.title}</h1>
+    <article className="bg-nexgen-mist dark:bg-[#070b1a]">
+      <header className="relative overflow-hidden bg-gradient-to-br from-nexgen-purple via-nexgen-orange to-nexgen-teal text-white">
+        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_50%_30%,white_0%,transparent_45%)]" aria-hidden />
+        <div className="relative mx-auto max-w-4xl px-5 sm:px-6 lg:px-10 py-12 sm:py-16">
+          <h1 className="font-display font-black text-4xl sm:text-5xl lg:text-6xl tracking-tight">{page.title}</h1>
+        </div>
       </header>
-      <main dangerouslySetInnerHTML={{__html: page.body}} />
-    </div>
+      <div className="mx-auto max-w-3xl px-5 sm:px-6 lg:px-10 py-10 sm:py-14">
+        <div
+          dangerouslySetInnerHTML={{__html: page.body}}
+          className="prose prose-sm sm:prose-base lg:prose-lg max-w-none text-nexgen-night/85 dark:text-slate-300 [&_h2]:font-display [&_h2]:font-black [&_h2]:text-nexgen-night dark:[&_h2]:text-white [&_h3]:font-display [&_h3]:font-bold [&_h3]:text-nexgen-night dark:[&_h3]:text-white [&_a]:text-nexgen-orange [&_a]:underline [&_strong]:text-nexgen-night dark:[&_strong]:text-white"
+        />
+      </div>
+    </article>
   );
 }
 

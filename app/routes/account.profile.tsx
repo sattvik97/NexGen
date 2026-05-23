@@ -16,7 +16,7 @@ export type ActionResponse = {
 };
 
 export const meta: Route.MetaFunction = () => {
-  return [{title: 'Profile'}];
+  return [{title: 'Profile | NexGen Toys'}];
 };
 
 export async function loader({context}: Route.LoaderArgs) {

@@ -30,7 +30,7 @@ type OrdersLoaderData = {
 };
 
 export const meta: Route.MetaFunction = () => {
-  return [{title: 'Orders'}];
+  return [{title: 'Orders | NexGen Toys'}];
 };
 
 export async function loader({request, context}: Route.LoaderArgs) {
@@ -202,21 +202,24 @@ function OrderSearchForm({
 function OrderItem({order}: {order: OrderItemFragment}) {
   const fulfillmentStatus = flattenConnection(order.fulfillments)[0]?.status;
   return (
-    <>
-      <fieldset>
-        <Link to={`/account/orders/${btoa(order.id)}`}>
-          <strong>#{order.number}</strong>
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-nexgen-mist dark:bg-white/5 ring-1 ring-nexgen-night/5 dark:ring-white/10 mb-3">
+      <div className="min-w-0">
+        <Link to={`/account/orders/${btoa(order.id)}`} className="font-display font-black text-lg text-nexgen-night dark:text-white hover:text-nexgen-orange transition">
+          #{order.number}
         </Link>
-        <p>{new Date(order.processedAt).toDateString()}</p>
+        <p className="text-xs text-nexgen-night/60 dark:text-slate-400 mt-0.5">{new Date(order.processedAt).toDateString()}</p>
         {order.confirmationNumber && (
-          <p>Confirmation: {order.confirmationNumber}</p>
+          <p className="text-xs text-nexgen-night/60 dark:text-slate-400">Confirmation: {order.confirmationNumber}</p>
         )}
-        <p>{order.financialStatus}</p>
-        {fulfillmentStatus && <p>{fulfillmentStatus}</p>}
-        <Money data={order.totalPrice} />
-        <Link to={`/account/orders/${btoa(order.id)}`}>View Order →</Link>
-      </fieldset>
-      <br />
-    </>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="inline-flex items-center rounded-full bg-nexgen-purple/10 text-nexgen-purple px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider">{order.financialStatus}</span>
+        {fulfillmentStatus && (
+          <span className="inline-flex items-center rounded-full bg-nexgen-teal/10 text-nexgen-teal px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider">{fulfillmentStatus}</span>
+        )}
+        <span className="font-display font-black text-nexgen-night dark:text-white tabular-nums"><Money data={order.totalPrice} /></span>
+        <Link to={`/account/orders/${btoa(order.id)}`} className="text-sm font-semibold text-nexgen-purple hover:text-nexgen-orange transition">View →</Link>
+      </div>
+    </div>
   );
 }

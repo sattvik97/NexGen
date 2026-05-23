@@ -10,22 +10,22 @@ type CartSummaryProps = {
 };
 
 export function CartSummary({cart, layout}: CartSummaryProps) {
-  const className =
-    layout === 'page' ? 'cart-summary-page' : 'cart-summary-aside';
-
   return (
-    <div aria-labelledby="cart-summary" className={className}>
-      <h4>Totals</h4>
-      <dl className="cart-subtotal">
-        <dt>Subtotal</dt>
-        <dd>
+    <div
+      aria-labelledby="cart-summary"
+      className="shrink-0 border-t border-nexgen-night/10 dark:border-white/10 bg-white dark:bg-[#0a1020] px-5 sm:px-6 py-5 space-y-4"
+    >
+      <div className="flex items-baseline justify-between">
+        <h4 id="cart-summary" className="font-display font-black uppercase text-sm tracking-wider text-nexgen-night/60 dark:text-slate-400">Subtotal</h4>
+        <span className="text-2xl font-display font-black text-nexgen-night dark:text-white tabular-nums">
           {cart?.cost?.subtotalAmount?.amount ? (
             <Money data={cart?.cost?.subtotalAmount} />
-          ) : (
-            '-'
-          )}
-        </dd>
-      </dl>
+          ) : '—'}
+        </span>
+      </div>
+      <p className="text-[11px] text-nexgen-night/55 dark:text-slate-500">
+        Taxes and shipping calculated at checkout.
+      </p>
       <CartDiscounts discountCodes={cart?.discountCodes} />
       <CartGiftCard giftCardCodes={cart?.appliedGiftCards} />
       <CartCheckoutActions checkoutUrl={cart?.checkoutUrl} />
@@ -35,14 +35,14 @@ export function CartSummary({cart, layout}: CartSummaryProps) {
 
 function CartCheckoutActions({checkoutUrl}: {checkoutUrl?: string}) {
   if (!checkoutUrl) return null;
-
   return (
-    <div>
-      <a href={checkoutUrl} target="_self">
-        <p>Continue to Checkout &rarr;</p>
-      </a>
-      <br />
-    </div>
+    <a
+      href={checkoutUrl}
+      target="_self"
+      className="block w-full text-center rounded-full bg-gradient-to-r from-nexgen-orange via-nexgen-purple to-nexgen-teal text-white font-bold py-3.5 text-sm sm:text-base shadow-lg shadow-nexgen-purple/30 hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] transition"
+    >
+      Continue to Checkout →
+    </a>
   );
 }
 
@@ -76,18 +76,20 @@ function CartDiscounts({
 
       {/* Show an input to apply a discount */}
       <UpdateDiscountForm discountCodes={codes}>
-        <div>
-          <label htmlFor="discount-code-input" className="sr-only">
-            Discount code
-          </label>
+        <div className="flex items-stretch gap-2">
+          <label htmlFor="discount-code-input" className="sr-only">Discount code</label>
           <input
             id="discount-code-input"
             type="text"
             name="discountCode"
             placeholder="Discount code"
+            className="flex-1 min-w-0 rounded-full bg-nexgen-mist dark:bg-white/5 ring-1 ring-transparent focus:ring-nexgen-purple/40 focus:bg-white dark:focus:bg-white/10 px-4 py-2 text-sm text-nexgen-night dark:text-white placeholder:text-nexgen-night/45 dark:placeholder:text-slate-500 outline-none transition"
           />
-          &nbsp;
-          <button type="submit" aria-label="Apply discount code">
+          <button
+            type="submit"
+            aria-label="Apply discount code"
+            className="shrink-0 rounded-full bg-nexgen-night dark:bg-white/15 text-white font-semibold px-4 py-2 text-sm hover:bg-nexgen-night/90 dark:hover:bg-white/25 transition"
+          >
             Apply
           </button>
         </div>
@@ -150,15 +152,19 @@ function CartGiftCard({
       )}
 
       <AddGiftCardForm fetcherKey="gift-card-add">
-        <div>
+        <div className="flex items-stretch gap-2">
           <input
             type="text"
             name="giftCardCode"
             placeholder="Gift card code"
             ref={giftCardCodeInput}
+            className="flex-1 min-w-0 rounded-full bg-nexgen-mist dark:bg-white/5 ring-1 ring-transparent focus:ring-nexgen-purple/40 focus:bg-white dark:focus:bg-white/10 px-4 py-2 text-sm text-nexgen-night dark:text-white placeholder:text-nexgen-night/45 dark:placeholder:text-slate-500 outline-none transition"
           />
-          &nbsp;
-          <button type="submit" disabled={giftCardAddFetcher.state !== 'idle'}>
+          <button
+            type="submit"
+            disabled={giftCardAddFetcher.state !== 'idle'}
+            className="shrink-0 rounded-full bg-nexgen-night dark:bg-white/15 text-white font-semibold px-4 py-2 text-sm hover:bg-nexgen-night/90 dark:hover:bg-white/25 disabled:opacity-50 transition"
+          >
             Apply
           </button>
         </div>

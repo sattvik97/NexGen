@@ -4,7 +4,7 @@ import {Image} from '@shopify/hydrogen';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 
 export const meta: Route.MetaFunction = ({data}) => {
-  return [{title: `Hydrogen | ${data?.article.title ?? ''} article`}];
+  return [{title: `${data?.article.title ?? 'Article'} | NexGen Toys`}];
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -76,21 +76,29 @@ export default function Article() {
   }).format(new Date(article.publishedAt));
 
   return (
-    <div className="article">
-      <h1>
-        {title}
-        <div>
-          <time dateTime={article.publishedAt}>{publishedDate}</time> &middot;{' '}
-          <address>{author?.name}</address>
+    <article className="bg-nexgen-mist dark:bg-[#070b1a]">
+      <header className="relative overflow-hidden bg-gradient-to-br from-nexgen-night via-nexgen-purple to-nexgen-orange text-white">
+        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_60%_30%,white_0%,transparent_45%)]" aria-hidden />
+        <div className="relative mx-auto max-w-3xl px-5 sm:px-6 lg:px-10 py-12 sm:py-16">
+          <h1 className="font-display font-black text-3xl sm:text-4xl lg:text-5xl tracking-tight">{title}</h1>
+          <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-white/85">
+            <time dateTime={article.publishedAt}>{publishedDate}</time>
+            {author?.name && (<><span aria-hidden>•</span><address className="not-italic">{author.name}</address></>)}
+          </div>
         </div>
-      </h1>
-
-      {image && <Image data={image} sizes="90vw" loading="eager" />}
-      <div
-        dangerouslySetInnerHTML={{__html: contentHtml}}
-        className="article"
-      />
-    </div>
+      </header>
+      <div className="mx-auto max-w-3xl px-5 sm:px-6 lg:px-10 py-10 sm:py-14">
+        {image && (
+          <div className="rounded-3xl overflow-hidden ring-1 ring-nexgen-night/5 dark:ring-white/10 shadow-xl mb-8">
+            <Image data={image} sizes="90vw" loading="eager" className="w-full h-auto object-cover" />
+          </div>
+        )}
+        <div
+          dangerouslySetInnerHTML={{__html: contentHtml}}
+          className="prose prose-sm sm:prose-base lg:prose-lg max-w-none text-nexgen-night/85 dark:text-slate-300 [&_h2]:font-display [&_h2]:font-black [&_h2]:text-nexgen-night dark:[&_h2]:text-white [&_h3]:font-display [&_h3]:font-bold [&_h3]:text-nexgen-night dark:[&_h3]:text-white [&_a]:text-nexgen-orange [&_a]:underline [&_strong]:text-nexgen-night dark:[&_strong]:text-white"
+        />
+      </div>
+    </article>
   );
 }
 

@@ -5,7 +5,7 @@ import {CartForm} from '@shopify/hydrogen';
 import {CartMain} from '~/components/CartMain';
 
 export const meta: Route.MetaFunction = () => {
-  return [{title: `Hydrogen | Cart`}];
+  return [{title: `Cart | NexGen Toys`}];
 };
 
 export const headers: HeadersFunction = ({actionHeaders}) => actionHeaders;
@@ -105,9 +105,18 @@ export default function Cart() {
   const cart = useLoaderData<typeof loader>();
 
   return (
-    <div className="cart">
-      <h1>Cart</h1>
-      <CartMain layout="page" cart={cart} />
+    <div className="bg-nexgen-mist dark:bg-[#070b1a] min-h-[60vh]">
+      <section className="relative overflow-hidden bg-gradient-to-br from-nexgen-orange via-nexgen-purple to-nexgen-teal text-white">
+        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_70%_30%,white_0%,transparent_45%)]" aria-hidden />
+        <div className="relative mx-auto max-w-3xl px-5 sm:px-6 lg:px-10 py-10 sm:py-14">
+          <h1 className="font-display font-black text-4xl sm:text-5xl tracking-tight">Your Cart</h1>
+        </div>
+      </section>
+      <div className="mx-auto max-w-3xl px-5 sm:px-6 lg:px-10 py-10">
+        <div className="rounded-3xl bg-white dark:bg-[#0d1326] ring-1 ring-nexgen-night/5 dark:ring-white/10 shadow-xl overflow-hidden">
+          <CartMain layout="page" cart={cart} />
+        </div>
+      </div>
     </div>
   );
 }

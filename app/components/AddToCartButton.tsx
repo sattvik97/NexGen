@@ -27,8 +27,10 @@ export function AddToCartButton({
             type="submit"
             onClick={onClick}
             disabled={disabled ?? fetcher.state !== 'idle'}
+            className="group/atc relative w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-nexgen-orange via-nexgen-purple to-nexgen-teal text-white font-bold text-sm sm:text-base px-8 sm:px-10 py-3.5 sm:py-4 shadow-lg shadow-nexgen-purple/30 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed transition"
           >
-            {children}
+            <span className="text-base" aria-hidden>🛒</span>
+            <span>{children}</span>
           </button>
         </>
       )}

@@ -8,20 +8,14 @@ export function ProductPrice({
   price?: MoneyV2;
   compareAtPrice?: MoneyV2 | null;
 }) {
-  return (
-    <div className="product-price">
-      {compareAtPrice ? (
-        <div className="product-price-on-sale">
-          {price ? <Money data={price} /> : null}
-          <s>
-            <Money data={compareAtPrice} />
-          </s>
-        </div>
-      ) : price ? (
-        <Money data={price} />
-      ) : (
-        <span>&nbsp;</span>
-      )}
-    </div>
-  );
+  if (compareAtPrice && price) {
+    return (
+      <div className="inline-flex flex-wrap items-baseline gap-3">
+        <span><Money data={price} /></span>
+        <s className="text-base font-semibold text-nexgen-night/45 dark:text-slate-500"><Money data={compareAtPrice} /></s>
+      </div>
+    );
+  }
+  if (price) return <Money data={price} />;
+  return <span>&nbsp;</span>;
 }

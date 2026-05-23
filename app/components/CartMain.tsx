@@ -50,20 +50,14 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
   const childrenMap = getLineItemChildrenMap(cart?.lines?.nodes ?? []);
 
   return (
-    <div className={className}>
+    <div className={`flex flex-col h-full ${layout === 'page' ? 'mx-auto max-w-3xl px-5 sm:px-6 py-10' : ''}`}>
       <CartEmpty hidden={linesCount} layout={layout} />
-      <div className="cart-details">
-        <p id="cart-lines" className="sr-only">
-          Line items
-        </p>
-        <div>
-          <ul aria-labelledby="cart-lines">
+      {linesCount && (
+        <div className="flex flex-col h-full min-h-0">
+          <p id="cart-lines" className="sr-only">Line items</p>
+          <ul aria-labelledby="cart-lines" className="flex-1 overflow-y-auto">
             {(cart?.lines?.nodes ?? []).map((line) => {
-              // we do not render non-parent lines at the root of the cart
-              if (
-                'parentRelationship' in line &&
-                line.parentRelationship?.parent
-              ) {
+              if ('parentRelationship' in line && line.parentRelationship?.parent) {
                 return null;
               }
               return (
@@ -76,9 +70,9 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
               );
             })}
           </ul>
+          {cartHasItems && <CartSummary cart={cart} layout={layout} />}
         </div>
-        {cartHasItems && <CartSummary cart={cart} layout={layout} />}
-      </div>
+      )}
     </div>
   );
 }
@@ -91,14 +85,18 @@ function CartEmpty({
 }) {
   const {close} = useAside();
   return (
-    <div hidden={hidden}>
-      <br />
-      <p>
-        Looks like you haven&rsquo;t added anything yet, let&rsquo;s get you
-        started!
+    <div hidden={hidden} className="flex-1 flex flex-col items-center justify-center text-center px-6 py-16 gap-4">
+      <div className="text-5xl" aria-hidden>🛒</div>
+      <h4 className="font-display font-black text-xl text-nexgen-night dark:text-white">Your cart is empty</h4>
+      <p className="text-sm text-nexgen-night/70 dark:text-slate-400 max-w-xs">
+        Looks like you haven&rsquo;t added anything yet. Let&rsquo;s find something fun!
       </p>
-      <br />
-      <Link to="/collections" onClick={close} prefetch="viewport">
+      <Link
+        to="/collections"
+        onClick={close}
+        prefetch="viewport"
+        className="mt-2 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-nexgen-orange to-nexgen-purple text-white font-bold px-6 py-3 text-sm shadow-lg shadow-nexgen-purple/30 hover:shadow-xl hover:scale-[1.02] active:scale-95 transition"
+      >
         Continue shopping →
       </Link>
     </div>

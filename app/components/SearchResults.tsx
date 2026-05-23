@@ -39,9 +39,9 @@ function SearchResultsArticles({
   }
 
   return (
-    <div className="search-result">
-      <h2>Articles</h2>
-      <div>
+    <section>
+      <h2 className="font-display font-black uppercase tracking-wider text-sm text-nexgen-night/60 dark:text-slate-400 mb-3">Articles</h2>
+      <ul className="divide-y divide-nexgen-night/10 dark:divide-white/10 rounded-2xl bg-white dark:bg-[#0d1326] ring-1 ring-nexgen-night/5 dark:ring-white/10 overflow-hidden">
         {articles?.nodes?.map((article) => {
           const articleUrl = urlWithTrackingParams({
             baseUrl: `/blogs/${article.handle}`,
@@ -50,16 +50,15 @@ function SearchResultsArticles({
           });
 
           return (
-            <div className="search-results-item" key={article.id}>
-              <Link prefetch="intent" to={articleUrl}>
+            <li key={article.id}>
+              <Link prefetch="intent" to={articleUrl} className="block px-5 py-3 text-nexgen-night dark:text-slate-100 hover:bg-nexgen-mist dark:hover:bg-white/5 hover:text-nexgen-orange transition">
                 {article.title}
               </Link>
-            </div>
+            </li>
           );
         })}
-      </div>
-      <br />
-    </div>
+      </ul>
+    </section>
   );
 }
 
@@ -69,9 +68,9 @@ function SearchResultsPages({term, pages}: PartialSearchResult<'pages'>) {
   }
 
   return (
-    <div className="search-result">
-      <h2>Pages</h2>
-      <div>
+    <section>
+      <h2 className="font-display font-black uppercase tracking-wider text-sm text-nexgen-night/60 dark:text-slate-400 mb-3">Pages</h2>
+      <ul className="divide-y divide-nexgen-night/10 dark:divide-white/10 rounded-2xl bg-white dark:bg-[#0d1326] ring-1 ring-nexgen-night/5 dark:ring-white/10 overflow-hidden">
         {pages?.nodes?.map((page) => {
           const pageUrl = urlWithTrackingParams({
             baseUrl: `/pages/${page.handle}`,
@@ -80,16 +79,15 @@ function SearchResultsPages({term, pages}: PartialSearchResult<'pages'>) {
           });
 
           return (
-            <div className="search-results-item" key={page.id}>
-              <Link prefetch="intent" to={pageUrl}>
+            <li key={page.id}>
+              <Link prefetch="intent" to={pageUrl} className="block px-5 py-3 text-nexgen-night dark:text-slate-100 hover:bg-nexgen-mist dark:hover:bg-white/5 hover:text-nexgen-orange transition">
                 {page.title}
               </Link>
-            </div>
+            </li>
           );
         })}
-      </div>
-      <br />
-    </div>
+      </ul>
+    </section>
   );
 }
 
@@ -102,8 +100,8 @@ function SearchResultsProducts({
   }
 
   return (
-    <div className="search-result">
-      <h2>Products</h2>
+    <section>
+      <h2 className="font-display font-black uppercase tracking-wider text-sm text-nexgen-night/60 dark:text-slate-400 mb-3">Products</h2>
       <Pagination connection={products}>
         {({nodes, isLoading, NextLink, PreviousLink}) => {
           const ItemsMarkup = nodes.map((product) => {
@@ -117,45 +115,54 @@ function SearchResultsProducts({
             const image = product?.selectedOrFirstAvailableVariant?.image;
 
             return (
-              <div className="search-results-item" key={product.id}>
-                <Link prefetch="intent" to={productUrl}>
-                  {image && (
-                    <Image data={image} alt={product.title} width={50} />
-                  )}
-                  <div>
-                    <p>{product.title}</p>
-                    <small>{price && <Money data={price} />}</small>
+              <li key={product.id}>
+                <Link
+                  prefetch="intent"
+                  to={productUrl}
+                  className="flex items-center gap-4 p-3 sm:p-4 rounded-2xl bg-white dark:bg-[#0d1326] ring-1 ring-nexgen-night/5 dark:ring-white/10 hover:shadow-lg hover:-translate-y-0.5 transition"
+                >
+                  <div className="size-16 sm:size-20 shrink-0 rounded-xl bg-nexgen-cream dark:bg-white/5 overflow-hidden flex items-center justify-center">
+                    {image && (
+                      <Image data={image} alt={product.title} width={80} className="w-full h-full object-contain p-1" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-display font-bold text-nexgen-night dark:text-white line-clamp-2">{product.title}</p>
+                    <span className="mt-1 inline-block text-sm font-display font-black text-nexgen-purple dark:text-nexgen-yellow tabular-nums">
+                      {price && <Money data={price} />}
+                    </span>
                   </div>
                 </Link>
-              </div>
+              </li>
             );
           });
 
           return (
-            <div>
-              <div>
-                <PreviousLink>
-                  {isLoading ? 'Loading...' : <span>↑ Load previous</span>}
+            <div className="space-y-3">
+              <div className="flex justify-center">
+                <PreviousLink className="text-sm font-semibold text-nexgen-purple hover:text-nexgen-orange transition">
+                  {isLoading ? 'Loading…' : <span>↑ Load previous</span>}
                 </PreviousLink>
               </div>
-              <div>
-                {ItemsMarkup}
-                <br />
-              </div>
-              <div>
-                <NextLink>
-                  {isLoading ? 'Loading...' : <span>Load more ↓</span>}
+              <ul className="space-y-3">{ItemsMarkup}</ul>
+              <div className="flex justify-center pt-2">
+                <NextLink className="inline-flex items-center gap-1 rounded-full bg-nexgen-night dark:bg-white/15 text-white font-bold px-5 py-2.5 text-sm hover:scale-[1.02] transition">
+                  {isLoading ? 'Loading…' : <span>Load more ↓</span>}
                 </NextLink>
               </div>
             </div>
           );
         }}
       </Pagination>
-      <br />
-    </div>
+    </section>
   );
 }
 
 function SearchResultsEmpty() {
-  return <p>No results, try a different search.</p>;
+  return (
+    <div className="text-center py-16">
+      <div className="text-5xl mb-3" aria-hidden>🔍</div>
+      <p className="text-nexgen-night/70 dark:text-slate-400">No results. Try a different search.</p>
+    </div>
+  );
 }

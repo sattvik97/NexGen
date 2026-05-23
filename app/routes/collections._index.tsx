@@ -46,20 +46,29 @@ export default function Collections() {
   const {collections} = useLoaderData<typeof loader>();
 
   return (
-    <div className="collections">
-      <h1>Collections</h1>
-      <PaginatedResourceSection<CollectionFragment>
-        connection={collections}
-        resourcesClassName="collections-grid"
-      >
-        {({node: collection, index}) => (
-          <CollectionItem
-            key={collection.id}
-            collection={collection}
-            index={index}
-          />
-        )}
-      </PaginatedResourceSection>
+    <div className="bg-nexgen-mist dark:bg-[#070b1a]">
+      <section className="relative overflow-hidden bg-gradient-to-br from-nexgen-teal via-nexgen-purple to-nexgen-orange text-white">
+        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_50%_20%,white_0%,transparent_45%)]" aria-hidden />
+        <div className="relative mx-auto max-w-7xl px-5 sm:px-6 lg:px-10 py-12 sm:py-16">
+          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/80">Browse</p>
+          <h1 className="mt-2 font-display font-black text-4xl sm:text-5xl lg:text-6xl tracking-tight">Collections</h1>
+          <p className="mt-4 max-w-2xl text-base sm:text-lg text-white/90">Shop by curated themes — the perfect way to find something fun.</p>
+        </div>
+      </section>
+      <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-10 py-10 sm:py-14">
+        <PaginatedResourceSection<CollectionFragment>
+          connection={collections}
+          resourcesClassName="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6"
+        >
+          {({node: collection, index}) => (
+            <CollectionItem
+              key={collection.id}
+              collection={collection}
+              index={index}
+            />
+          )}
+        </PaginatedResourceSection>
+      </div>
     </div>
   );
 }
@@ -73,21 +82,26 @@ function CollectionItem({
 }) {
   return (
     <Link
-      className="collection-item"
       key={collection.id}
       to={`/collections/${collection.handle}`}
       prefetch="intent"
+      className="group relative block aspect-[4/3] overflow-hidden rounded-3xl bg-nexgen-cream dark:bg-white/5 ring-1 ring-nexgen-night/5 dark:ring-white/10 shadow-sm hover:shadow-xl hover:-translate-y-1 transition"
     >
       {collection?.image && (
         <Image
           alt={collection.image.altText || collection.title}
-          aspectRatio="1/1"
+          aspectRatio="4/3"
           data={collection.image}
           loading={index < 3 ? 'eager' : undefined}
-          sizes="(min-width: 45em) 400px, 100vw"
+          sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw"
+          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500"
         />
       )}
-      <h5>{collection.title}</h5>
+      <div className="absolute inset-0 bg-gradient-to-t from-nexgen-night/80 via-nexgen-night/20 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
+        <h3 className="font-display font-black text-xl sm:text-2xl text-white drop-shadow">{collection.title}</h3>
+        <span className="mt-1 inline-flex items-center gap-1 text-sm text-white/85 font-semibold">Shop now →</span>
+      </div>
     </Link>
   );
 }

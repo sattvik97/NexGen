@@ -6,7 +6,7 @@ import {ProductItem} from '~/components/ProductItem';
 import type {CollectionItemFragment} from 'storefrontapi.generated';
 
 export const meta: Route.MetaFunction = () => {
-  return [{title: `Hydrogen | Products`}];
+  return [{title: `All Products | NexGen Toys`}];
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -51,20 +51,29 @@ export default function Collection() {
   const {products} = useLoaderData<typeof loader>();
 
   return (
-    <div className="collection">
-      <h1>Products</h1>
-      <PaginatedResourceSection<CollectionItemFragment>
-        connection={products}
-        resourcesClassName="products-grid"
-      >
-        {({node: product, index}) => (
-          <ProductItem
-            key={product.id}
-            product={product}
-            loading={index < 8 ? 'eager' : undefined}
-          />
-        )}
-      </PaginatedResourceSection>
+    <div className="bg-nexgen-mist dark:bg-[#070b1a]">
+      <section className="relative overflow-hidden bg-gradient-to-br from-nexgen-orange via-nexgen-purple to-nexgen-teal text-white">
+        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_80%_30%,white_0%,transparent_45%)]" aria-hidden />
+        <div className="relative mx-auto max-w-7xl px-5 sm:px-6 lg:px-10 py-12 sm:py-16">
+          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/80">Catalog</p>
+          <h1 className="mt-2 font-display font-black text-4xl sm:text-5xl lg:text-6xl tracking-tight">All Products</h1>
+          <p className="mt-4 max-w-2xl text-base sm:text-lg text-white/90">Everything in one place — from cuddly plushies to high-speed RC cars.</p>
+        </div>
+      </section>
+      <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-10 py-10 sm:py-14">
+        <PaginatedResourceSection<CollectionItemFragment>
+          connection={products}
+          resourcesClassName="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6"
+        >
+          {({node: product, index}) => (
+            <ProductItem
+              key={product.id}
+              product={product}
+              loading={index < 8 ? 'eager' : undefined}
+            />
+          )}
+        </PaginatedResourceSection>
+      </div>
     </div>
   );
 }

@@ -14,7 +14,7 @@ import type {
 } from 'storefrontapi.generated';
 
 export const meta: Route.MetaFunction = () => {
-  return [{title: `Hydrogen | Search`}];
+  return [{title: `Search | NexGen Toys`}];
 };
 
 export async function loader({request, context}: Route.LoaderArgs) {
@@ -41,38 +41,53 @@ export default function SearchPage() {
   if (type === 'predictive') return null;
 
   return (
-    <div className="search">
-      <h1>Search</h1>
-      <SearchForm>
-        {({inputRef}) => (
-          <>
-            <input
-              defaultValue={term}
-              name="q"
-              placeholder="Search…"
-              ref={inputRef}
-              type="search"
-            />
-            &nbsp;
-            <button type="submit">Search</button>
-          </>
+    <div className="bg-nexgen-mist dark:bg-[#070b1a] min-h-[60vh]">
+      <section className="relative overflow-hidden bg-gradient-to-br from-nexgen-night via-nexgen-purple to-nexgen-orange text-white">
+        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_70%_30%,white_0%,transparent_45%)]" aria-hidden />
+        <div className="relative mx-auto max-w-4xl px-5 sm:px-6 lg:px-10 py-12 sm:py-16">
+          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/80">Search</p>
+          <h1 className="mt-2 font-display font-black text-4xl sm:text-5xl tracking-tight">What are you looking for?</h1>
+          <div className="mt-6">
+            <SearchForm>
+              {({inputRef}) => (
+                <div className="flex items-stretch gap-2 bg-white dark:bg-[#0d1326] rounded-full p-1.5 shadow-xl ring-1 ring-white/10">
+                  <input
+                    defaultValue={term}
+                    name="q"
+                    placeholder="Search products, pages, articles…"
+                    ref={inputRef}
+                    type="search"
+                    className="flex-1 min-w-0 bg-transparent px-4 py-2.5 text-base text-nexgen-night dark:text-white placeholder:text-nexgen-night/45 dark:placeholder:text-slate-500 outline-none"
+                  />
+                  <button
+                    type="submit"
+                    className="shrink-0 rounded-full bg-gradient-to-r from-nexgen-orange to-nexgen-purple text-white font-bold px-6 py-2.5 text-sm hover:scale-[1.03] active:scale-95 transition"
+                  >
+                    Search
+                  </button>
+                </div>
+              )}
+            </SearchForm>
+          </div>
+        </div>
+      </section>
+      <div className="mx-auto max-w-4xl px-5 sm:px-6 lg:px-10 py-10 sm:py-14">
+        {error && <p className="text-sm text-red-500 mb-4">{error}</p>}
+        {!term || !result?.total ? (
+          <SearchResults.Empty />
+        ) : (
+          <SearchResults result={result} term={term}>
+            {({articles, pages, products, term}) => (
+              <div className="space-y-10">
+                <SearchResults.Products products={products} term={term} />
+                <SearchResults.Pages pages={pages} term={term} />
+                <SearchResults.Articles articles={articles} term={term} />
+              </div>
+            )}
+          </SearchResults>
         )}
-      </SearchForm>
-      {error && <p style={{color: 'red'}}>{error}</p>}
-      {!term || !result?.total ? (
-        <SearchResults.Empty />
-      ) : (
-        <SearchResults result={result} term={term}>
-          {({articles, pages, products, term}) => (
-            <div>
-              <SearchResults.Products products={products} term={term} />
-              <SearchResults.Pages pages={pages} term={term} />
-              <SearchResults.Articles articles={articles} term={term} />
-            </div>
-          )}
-        </SearchResults>
-      )}
-      <Analytics.SearchView data={{searchTerm: term, searchResults: result}} />
+        <Analytics.SearchView data={{searchTerm: term, searchResults: result}} />
+      </div>
     </div>
   );
 }

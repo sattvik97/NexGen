@@ -55,18 +55,48 @@ export function Aside({
   return (
     <div
       aria-modal
-      className={`overlay ${expanded ? 'expanded' : ''}`}
+      aria-labelledby="aside-heading"
+      className={`fixed inset-0 z-[70] transition ${
+        expanded ? 'pointer-events-auto' : 'pointer-events-none'
+      }`}
       role="dialog"
     >
-      <button className="close-outside" onClick={close} />
-      <aside>
-        <header>
-          <h3>{heading}</h3>
-          <button className="close reset" onClick={close} aria-label="Close">
-            &times;
+      {/* Backdrop */}
+      <button
+        type="button"
+        aria-label="Close"
+        onClick={close}
+        className={`absolute inset-0 bg-nexgen-night/60 backdrop-blur-sm transition-opacity duration-300 ${
+          expanded ? 'opacity-100' : 'opacity-0'
+        }`}
+      />
+      {/* Panel */}
+      <aside
+        className={`absolute right-0 top-0 h-full w-full sm:w-[420px] lg:w-[460px] max-w-full bg-white dark:bg-[#0d1326] text-nexgen-night dark:text-slate-100 shadow-2xl shadow-nexgen-night/30 flex flex-col transition-transform duration-300 ease-out ${
+          expanded ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        <header className="flex items-center justify-between gap-3 px-5 sm:px-6 py-4 border-b border-nexgen-night/10 dark:border-white/10">
+          <h3
+            id="aside-heading"
+            className="text-base sm:text-lg font-display font-black tracking-tight uppercase"
+          >
+            {heading}
+          </h3>
+          <button
+            type="button"
+            onClick={close}
+            aria-label="Close"
+            className="inline-flex size-9 items-center justify-center rounded-full bg-nexgen-night/5 hover:bg-nexgen-night/10 dark:bg-white/10 dark:hover:bg-white/20 text-nexgen-night dark:text-white transition active:scale-95"
+          >
+            <svg viewBox="0 0 20 20" className="size-4" fill="none" stroke="currentColor" strokeWidth="2.4">
+              <path d="M5 5l10 10M15 5L5 15" strokeLinecap="round" />
+            </svg>
           </button>
         </header>
-        <main>{children}</main>
+        <main className="flex-1 overflow-y-auto overscroll-contain">
+          {children}
+        </main>
       </aside>
     </div>
   );

@@ -35,44 +35,52 @@ export function CartLineItem({
   const childrenLabelId = `cart-line-children-${id}`;
 
   return (
-    <li key={id} className="cart-line">
-      <div className="cart-line-inner">
+    <li key={id} className="px-5 sm:px-6 py-5 border-b border-nexgen-night/10 dark:border-white/10">
+      <div className="flex gap-4">
         {image && (
-          <Image
-            alt={title}
-            aspectRatio="1/1"
-            data={image}
-            height={100}
-            loading="lazy"
-            width={100}
-          />
-        )}
-
-        <div>
           <Link
             prefetch="intent"
             to={lineItemUrl}
-            onClick={() => {
-              if (layout === 'aside') {
-                close();
-              }
-            }}
+            onClick={() => { if (layout === 'aside') close(); }}
+            className="shrink-0 block size-20 sm:size-24 overflow-hidden rounded-xl bg-nexgen-cream dark:bg-white/5 ring-1 ring-nexgen-night/5 dark:ring-white/10"
           >
-            <p>
-              <strong>{product.title}</strong>
+            <Image
+              alt={title}
+              aspectRatio="1/1"
+              data={image}
+              height={96}
+              loading="lazy"
+              width={96}
+              className="w-full h-full object-cover"
+            />
+          </Link>
+        )}
+        <div className="flex-1 min-w-0">
+          <Link
+            prefetch="intent"
+            to={lineItemUrl}
+            onClick={() => { if (layout === 'aside') close(); }}
+            className="block"
+          >
+            <p className="font-bold text-sm sm:text-base text-nexgen-night dark:text-white line-clamp-2 hover:text-nexgen-orange transition-colors">
+              {product.title}
             </p>
           </Link>
-          <ProductPrice price={line?.cost?.totalAmount} />
-          <ul>
-            {selectedOptions.map((option) => (
-              <li key={option.name}>
-                <small>
-                  {option.name}: {option.value}
-                </small>
-              </li>
-            ))}
-          </ul>
-          <CartLineQuantity line={line} />
+          {selectedOptions.length > 0 && (
+            <ul className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5 text-[11px] text-nexgen-night/60 dark:text-slate-400">
+              {selectedOptions.map((option) => (
+                <li key={option.name}>
+                  <span className="font-semibold">{option.name}:</span> {option.value}
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="mt-2 flex items-center justify-between gap-3">
+            <div className="text-sm font-bold text-nexgen-night dark:text-white">
+              <ProductPrice price={line?.cost?.totalAmount} />
+            </div>
+            <CartLineQuantity line={line} />
+          </div>
         </div>
       </div>
 
@@ -109,30 +117,30 @@ function CartLineQuantity({line}: {line: CartLine}) {
   const nextQuantity = Number((quantity + 1).toFixed(0));
 
   return (
-    <div className="cart-line-quantity">
-      <small>Quantity: {quantity} &nbsp;&nbsp;</small>
+    <div className="inline-flex items-center gap-1 rounded-full ring-1 ring-nexgen-night/15 dark:ring-white/15 overflow-hidden text-sm">
       <CartLineUpdateButton lines={[{id: lineId, quantity: prevQuantity}]}>
         <button
           aria-label="Decrease quantity"
           disabled={quantity <= 1 || !!isOptimistic}
           name="decrease-quantity"
           value={prevQuantity}
+          className="size-7 inline-flex items-center justify-center hover:bg-nexgen-night/5 dark:hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed transition"
         >
-          <span>&#8722; </span>
+          −
         </button>
       </CartLineUpdateButton>
-      &nbsp;
+      <span className="min-w-[24px] text-center font-semibold text-nexgen-night dark:text-white tabular-nums">{quantity}</span>
       <CartLineUpdateButton lines={[{id: lineId, quantity: nextQuantity}]}>
         <button
           aria-label="Increase quantity"
           name="increase-quantity"
           value={nextQuantity}
           disabled={!!isOptimistic}
+          className="size-7 inline-flex items-center justify-center hover:bg-nexgen-night/5 dark:hover:bg-white/10 disabled:opacity-40 transition"
         >
-          <span>&#43;</span>
+          +
         </button>
       </CartLineUpdateButton>
-      &nbsp;
       <CartLineRemoveButton lineIds={[lineId]} disabled={!!isOptimistic} />
     </div>
   );
@@ -157,8 +165,16 @@ function CartLineRemoveButton({
       action={CartForm.ACTIONS.LinesRemove}
       inputs={{lineIds}}
     >
-      <button disabled={disabled} type="submit">
-        Remove
+      <button
+        disabled={disabled}
+        type="submit"
+        aria-label="Remove line item"
+        className="size-7 inline-flex items-center justify-center text-nexgen-night/60 dark:text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition border-l border-nexgen-night/10 dark:border-white/10"
+        title="Remove"
+      >
+        <svg viewBox="0 0 20 20" className="size-3.5" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M3 6h14M8 6V4h4v2m-6 0v10a1 1 0 001 1h6a1 1 0 001-1V6" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
       </button>
     </CartForm>
   );
