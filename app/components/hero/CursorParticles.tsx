@@ -12,6 +12,10 @@ export function CursorParticles() {
     if (!canvas) return;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduce) return;
+    // Skip entirely on touch / coarse-pointer devices — saves a fullscreen
+    // canvas + RAF loop on phones where a cursor trail makes no sense.
+    const coarse = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+    if (coarse) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;

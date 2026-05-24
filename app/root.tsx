@@ -17,7 +17,10 @@ import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
 import {PageLayout} from './components/PageLayout';
-import {CursorParticles} from './components/hero/CursorParticles';
+import {lazy, Suspense, useEffect, useState} from 'react';
+const CursorParticles = lazy(() =>
+  import('./components/hero/CursorParticles').then((m) => ({default: m.CursorParticles})),
+);
 import {themeNoFlashScript} from './components/ThemeToggle';
 
 export type RootLoader = typeof loader;
@@ -259,6 +262,34 @@ export function Layout({children}: {children?: React.ReactNode}) {
   );
 }
 
+function DeferredCursorParticles() {
+  // Only mount the cursor canvas after the browser is idle + on hover-capable
+  // pointer devices. This removes ~all initial JS work on phones and keeps the
+  // hero paint fast on desktop too.
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const coarse = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (coarse || reduce) return;
+    const w = window as Window & {requestIdleCallback?: (cb: () => void, opts?: {timeout: number}) => number};
+    const ric = w.requestIdleCallback;
+    const id = ric
+      ? ric(() => setReady(true), {timeout: 2000})
+      : window.setTimeout(() => setReady(true), 1200);
+    return () => {
+      if (ric && typeof id === 'number') (window as unknown as {cancelIdleCallback: (n: number) => void}).cancelIdleCallback?.(id);
+      else window.clearTimeout(id as number);
+    };
+  }, []);
+  if (!ready) return null;
+  return (
+    <Suspense fallback={null}>
+      <CursorParticles />
+    </Suspense>
+  );
+}
+
 export default function App() {
   const data = useRouteLoaderData<RootLoader>('root');
 
@@ -275,8 +306,8 @@ export default function App() {
       <PageLayout {...data}>
         <Outlet />
       </PageLayout>
-      {/* Site-wide signature cursor sparkle trail (auto-skips on touch + prefers-reduced-motion) */}
-      <CursorParticles />
+      {/* Site-wide signature cursor sparkle trail (auto-skips on touch + prefers-reduced-motion + deferred to idle) */}
+      <DeferredCursorParticles />
     </Analytics.Provider>
   );
 }

@@ -306,6 +306,12 @@
   }
   .animate-orb { animation: nexgen-pulse 8s ease-in-out infinite; }
 
+  @keyframes nexgen-twinkle {
+    0%, 100% { opacity: 0.2; transform: scale(0.6); }
+    50%      { opacity: 1;   transform: scale(1.2); }
+  }
+  .animate-twinkle { animation: nexgen-twinkle 3s ease-in-out infinite; }
+
   @keyframes nexgen-drift {
     from { transform: translateX(-10%); }
     to { transform: translateX(110%); }
@@ -335,6 +341,7 @@
     .animate-float,
     .animate-float-slow,
     .animate-orb,
+    .animate-twinkle,
     .animate-drift,
     .marquee-track,
     .animate-marquee-shimmer {

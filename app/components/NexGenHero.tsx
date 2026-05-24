@@ -30,14 +30,22 @@ export function NexGenHero() {
   const reduce = useReducedMotion();
   const heroRef = useRef<HTMLElement>(null);
 
-  // R3F is browser-only; load the module after hydration. Skip on tiny phones
-  // (<360px) where the 3D scene yields little value for the bytes.
+  // R3F is browser-only and ships a fat Three.js bundle. Defer the dynamic
+  // import until the browser is idle so initial hero paint + interactivity
+  // are not blocked by it. Also skip on prefers-reduced-motion users.
   const [Scene, setScene] = useState<SceneCmp | null>(null);
   useEffect(() => {
     let alive = true;
-    import('./hero/ToyChestScene').then((m) => {
-      if (alive) setScene(() => m.ToyChestScene as SceneCmp);
-    });
+    const r = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (r) return;
+    const load = () => {
+      import('./hero/ToyChestScene').then((m) => {
+        if (alive) setScene(() => m.ToyChestScene as SceneCmp);
+      });
+    };
+    const w = window as Window & {requestIdleCallback?: (cb: () => void, opts?: {timeout: number}) => number};
+    if (w.requestIdleCallback) w.requestIdleCallback(load, {timeout: 2500});
+    else window.setTimeout(load, 700);
     return () => {
       alive = false;
     };
@@ -299,22 +307,22 @@ function AnimatedSky() {
         style={{animationDelay: '6s'}}
       />
 
-      {/* Stars */}
-      {Array.from({length: 28}).map((_, i) => {
+      {/* Stars — pure CSS twinkle (no framer-motion overhead) */}
+      {Array.from({length: 14}).map((_, i) => {
         const top = (i * 37) % 90;
         const left = (i * 53) % 100;
         const size = 2 + ((i * 7) % 4);
         return (
-          <motion.span
+          <span
             key={i}
-            className="absolute rounded-full bg-white"
-            style={{top: `${top}%`, left: `${left}%`, width: size, height: size}}
-            animate={{opacity: [0.2, 1, 0.2], scale: [0.6, 1.2, 0.6]}}
-            transition={{
-              duration: 2 + (i % 5) * 0.4,
-              delay: (i % 7) * 0.3,
-              repeat: Infinity,
-              ease: 'easeInOut',
+            className="absolute rounded-full bg-white animate-twinkle will-change-[opacity,transform]"
+            style={{
+              top: `${top}%`,
+              left: `${left}%`,
+              width: size,
+              height: size,
+              animationDuration: `${2 + (i % 5) * 0.4}s`,
+              animationDelay: `${(i % 7) * 0.3}s`,
             }}
           />
         );

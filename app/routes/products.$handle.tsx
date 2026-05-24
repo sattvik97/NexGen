@@ -122,7 +122,7 @@ export default function Product() {
             {vendor && (
               <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-nexgen-purple">{vendor}</p>
             )}
-            <h1 className="mt-1 font-display font-black text-3xl sm:text-4xl lg:text-5xl leading-tight tracking-tight text-nexgen-night dark:text-white">
+            <h1 className="mt-1 font-display font-black text-xl sm:text-2xl lg:text-[1.75rem] leading-snug tracking-tight text-nexgen-night dark:text-white text-balance">
               {title}
             </h1>
             <div className="mt-4 text-2xl sm:text-3xl font-display font-black text-nexgen-night dark:text-white">
