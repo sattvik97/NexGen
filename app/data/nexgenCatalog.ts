@@ -9,6 +9,8 @@ export type NexGenProduct = {
   handle: string;
   title: string;
   priceINR: number;
+  /** MRP shown struck-through next to the selling price. */
+  mrpINR?: number;
   image: string;
   category: NexGenCategoryHandle;
   badge?: 'hot' | 'new' | 'sold-out' | 'best';
@@ -165,7 +167,7 @@ export const NEXGEN_PRODUCTS: NexGenProduct[] = [
     handle:
       '1-18-cyber-truck-rc-car-high-speed-remote-control-electric-pickup-truck-with-led-lights-usb-charging',
     title: '1:18 Cyber Truck RC Car — LED Lights & USB Charging',
-    priceINR: 1500,
+    priceINR: 1499,
     image:
       'https://nexgen.toys/cdn/shop/files/ChatGPTImageMay18_2026_11_27_29AM.png?v=1779087548&width=720',
     category: 'rc-cars',
@@ -229,7 +231,7 @@ export const NEXGEN_PRODUCTS: NexGenProduct[] = [
     handle:
       'high-speed-f1-racing-remote-control-car-with-led-smoke-powerful-engine-red-edition-2-4ghz-rc-formula-car-for-kids-adults',
     title: 'High-Speed F1 Racing Car — LED Smoke, Red Edition',
-    priceINR: 1149,
+    priceINR: 1499,
     image: 'https://nexgen.toys/cdn/shop/files/rccar_1200_clean.jpg?v=1772776885&width=720',
     category: 'rc-cars',
     badge: 'best',

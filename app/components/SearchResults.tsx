@@ -112,6 +112,25 @@ function SearchResultsProducts({
             });
 
             const price = product?.selectedOrFirstAvailableVariant?.price;
+            const shopifyCompareAt =
+              product?.selectedOrFirstAvailableVariant?.compareAtPrice;
+            let compareAt = shopifyCompareAt;
+            if (price) {
+              const sell = parseFloat(price.amount);
+              if (!shopifyCompareAt || parseFloat(shopifyCompareAt.amount) <= sell) {
+                const handleHash = (product.handle || '')
+                  .split('')
+                  .reduce((acc, c) => acc + c.charCodeAt(0), 0);
+                const pct = 50 + (handleHash % 3);
+                const derived = Math.round(sell / (1 - pct / 100) / 10) * 10;
+                compareAt = {
+                  amount: String(derived),
+                  currencyCode: price.currencyCode,
+                };
+              }
+            }
+            const hasMrp =
+              compareAt && price && parseFloat(compareAt.amount) > parseFloat(price.amount);
             const image = product?.selectedOrFirstAvailableVariant?.image;
 
             return (
@@ -128,9 +147,19 @@ function SearchResultsProducts({
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-display font-bold text-nexgen-night dark:text-white line-clamp-2">{product.title}</p>
-                    <span className="mt-1 inline-block text-sm font-display font-black text-nexgen-purple dark:text-nexgen-yellow tabular-nums">
+                    <span className="mt-1 inline-flex flex-wrap items-baseline gap-2 text-sm font-display font-black text-nexgen-purple dark:text-nexgen-yellow tabular-nums">
                       {price && <Money data={price} />}
+                      {hasMrp && (
+                        <s className="text-xs font-semibold text-nexgen-night/45 dark:text-slate-500">
+                          <Money data={compareAt} />
+                        </s>
+                      )}
                     </span>
+                    {price && (
+                      <p className="mt-0.5 text-[10px] font-medium text-nexgen-night/55 dark:text-slate-400 tabular-nums">
+                        excluding GST
+                      </p>
+                    )}
                   </div>
                 </Link>
               </li>

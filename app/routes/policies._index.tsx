@@ -1,21 +1,29 @@
 import {useLoaderData, Link} from 'react-router';
 import type {Route} from './+types/policies._index';
 import type {PoliciesQuery, PolicyItemFragment} from 'storefrontapi.generated';
+import {NEXGEN_POLICY_LIST} from '~/data/nexgenPolicies';
 
 export async function loader({context}: Route.LoaderArgs) {
-  const data: PoliciesQuery = await context.storefront.query(POLICIES_QUERY);
+  let policies: Array<{id: string; title: string; handle: string}> = [];
+  try {
+    const data: PoliciesQuery = await context.storefront.query(POLICIES_QUERY);
+    const shopPolicies = data.shop;
+    policies = [
+      shopPolicies?.privacyPolicy,
+      shopPolicies?.shippingPolicy,
+      shopPolicies?.termsOfService,
+      shopPolicies?.refundPolicy,
+      shopPolicies?.subscriptionPolicy,
+    ].filter((p): p is PolicyItemFragment => p != null);
+  } catch {
+    policies = [];
+  }
 
-  const shopPolicies = data.shop;
-  const policies: PolicyItemFragment[] = [
-    shopPolicies?.privacyPolicy,
-    shopPolicies?.shippingPolicy,
-    shopPolicies?.termsOfService,
-    shopPolicies?.refundPolicy,
-    shopPolicies?.subscriptionPolicy,
-  ].filter((policy): policy is PolicyItemFragment => policy != null);
-
-  if (!policies.length) {
-    throw new Response('No policies found', {status: 404});
+  // Always make sure the four core NexGen policies are listed.
+  for (const p of NEXGEN_POLICY_LIST) {
+    if (!policies.some((sp) => sp.handle === p.handle)) {
+      policies.push({id: `nexgen-${p.handle}`, title: p.title, handle: p.handle});
+    }
   }
 
   return {policies};

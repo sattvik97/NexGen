@@ -6,6 +6,7 @@ import {FeaturedCategories} from '~/components/FeaturedCategories';
 import {ShopByAge} from '~/components/ShopByAge';
 import {AllProducts} from '~/components/AllProducts';
 import {WhyParentsLove} from '~/components/WhyParentsLove';
+import {NexGenStory} from '~/components/NexGenStory';
 import {NewsletterCTA} from '~/components/NewsletterCTA';
 
 export const meta: Route.MetaFunction = () => {
@@ -40,6 +41,7 @@ export default function Homepage() {
       <FeaturedCategories />
       <AllProducts />
       <WhyParentsLove />
+      <NexGenStory />
       <NewsletterCTA />
     </div>
   );

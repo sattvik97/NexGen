@@ -124,7 +124,7 @@ function CartLineQuantity({line}: {line: CartLine}) {
           disabled={quantity <= 1 || !!isOptimistic}
           name="decrease-quantity"
           value={prevQuantity}
-          className="size-7 inline-flex items-center justify-center hover:bg-nexgen-night/5 dark:hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed transition"
+          className="size-9 sm:size-8 inline-flex items-center justify-center hover:bg-nexgen-night/5 dark:hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed transition"
         >
           −
         </button>
@@ -136,7 +136,7 @@ function CartLineQuantity({line}: {line: CartLine}) {
           name="increase-quantity"
           value={nextQuantity}
           disabled={!!isOptimistic}
-          className="size-7 inline-flex items-center justify-center hover:bg-nexgen-night/5 dark:hover:bg-white/10 disabled:opacity-40 transition"
+          className="size-9 sm:size-8 inline-flex items-center justify-center hover:bg-nexgen-night/5 dark:hover:bg-white/10 disabled:opacity-40 transition"
         >
           +
         </button>
@@ -169,7 +169,7 @@ function CartLineRemoveButton({
         disabled={disabled}
         type="submit"
         aria-label="Remove line item"
-        className="size-7 inline-flex items-center justify-center text-nexgen-night/60 dark:text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition border-l border-nexgen-night/10 dark:border-white/10"
+        className="size-9 sm:size-8 inline-flex items-center justify-center text-nexgen-night/60 dark:text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition border-l border-nexgen-night/10 dark:border-white/10"
         title="Remove"
       >
         <svg viewBox="0 0 20 20" className="size-3.5" fill="none" stroke="currentColor" strokeWidth="2">

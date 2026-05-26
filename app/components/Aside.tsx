@@ -52,10 +52,24 @@ export function Aside({
     return () => abortController.abort();
   }, [close, expanded]);
 
+  // Lock body scroll while the aside is open so the page behind doesn't
+  // scroll on touch devices.
+  useEffect(() => {
+    if (!expanded) return;
+    const {body} = document;
+    const prevOverflow = body.style.overflow;
+    body.style.overflow = 'hidden';
+    return () => {
+      body.style.overflow = prevOverflow;
+    };
+  }, [expanded]);
+
   return (
     <div
-      aria-modal
+      id={`${type}-aside`}
+      aria-modal={expanded || undefined}
       aria-labelledby="aside-heading"
+      aria-hidden={!expanded}
       className={`fixed inset-0 z-[70] transition ${
         expanded ? 'pointer-events-auto' : 'pointer-events-none'
       }`}

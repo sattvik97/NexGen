@@ -191,7 +191,6 @@ export function NexGenHero() {
           >
             <span className="inline-flex items-center gap-1.5"><span className="text-nexgen-teal">●</span> BIS Certified</span>
             <span className="inline-flex items-center gap-1.5"><span className="text-nexgen-orange">●</span> Ships 24h</span>
-            <span className="inline-flex items-center gap-1.5"><span className="text-nexgen-purple">●</span> 30-day Returns</span>
           </motion.div>
         </div>
 

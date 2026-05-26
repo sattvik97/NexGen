@@ -58,7 +58,7 @@ export function ThemeToggle({className = ''}: {className?: string}) {
       onClick={toggle}
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
       aria-pressed={isDark}
-      title={isDark ? 'Light mode' : 'Dark mode'}
+      title={`Theme: ${isDark ? 'switch to light' : 'switch to dark'}`}
       className={`relative inline-flex size-10 items-center justify-center rounded-full text-nexgen-night hover:bg-nexgen-mist transition group/theme overflow-hidden ${className}`}
     >
       {/* Sun icon */}

@@ -8,6 +8,8 @@ import {
 import type {HeaderQuery, CartApiQueryFragment} from 'storefrontapi.generated';
 import {useAside} from '~/components/Aside';
 import {ThemeToggle} from '~/components/ThemeToggle';
+import {useFavorites} from '~/lib/favorites';
+import {HeartIcon} from '~/components/FavoriteButton';
 
 interface HeaderProps {
   header: HeaderQuery;
@@ -20,9 +22,7 @@ interface HeaderProps {
 const ANNOUNCEMENTS = [
   {icon: '🚚', text: 'FREE DELIVERY on orders above ₹999'},
   {icon: '🎁', text: 'Use code NEXGEN10 for 10% off'},
-  {icon: '⚡', text: 'COD Available Pan-India'},
   {icon: '🛡️', text: 'BIS Certified · 100% Safe'},
-  {icon: '↩️', text: '30-Day Easy Returns'},
 ];
 
 function AnnouncementMarquee() {
@@ -90,7 +90,9 @@ export function Header({
 
           {/* CTAs */}
           <div className="ml-auto flex items-center gap-1 sm:gap-2 shrink-0">
+            <MobileSearchButton />
             <ThemeToggle />
+            <FavoritesLink />
             <AccountLink isLoggedIn={isLoggedIn} />
             <CartButton cart={cart} />
           </div>
@@ -145,6 +147,33 @@ function HeaderSearch() {
   );
 }
 
+/* ------------------------- Favorites ----------------------------- */
+function FavoritesLink() {
+  const {count} = useFavorites();
+  return (
+    <NavLink
+      to="/favorites"
+      prefetch="intent"
+      aria-label={`Wishlist${count ? `, ${count} items` : ''}`}
+      title="Wishlist"
+      className={({isActive}) =>
+        `relative inline-flex size-10 items-center justify-center rounded-full transition ${
+          isActive
+            ? 'text-rose-500 bg-rose-50'
+            : 'text-nexgen-night hover:bg-nexgen-mist hover:text-rose-500'
+        }`
+      }
+    >
+      <HeartIcon filled={count > 0} />
+      {count > 0 && (
+        <span className="absolute -top-0.5 -right-0.5 inline-flex min-w-[18px] h-[18px] items-center justify-center rounded-full bg-rose-500 text-white text-[10px] font-bold px-1">
+          {count > 99 ? '99+' : count}
+        </span>
+      )}
+    </NavLink>
+  );
+}
+
 /* ------------------------- Account / Cart ------------------------ */
 function AccountLink({
   isLoggedIn,
@@ -155,7 +184,8 @@ function AccountLink({
     <NavLink
       to="/account"
       prefetch="intent"
-      aria-label="Account"
+      aria-label="Profile"
+      title="Profile"
       className="inline-flex size-10 items-center justify-center rounded-full text-nexgen-night hover:bg-nexgen-mist transition"
     >
       <Suspense fallback={<UserIcon />}>
@@ -190,6 +220,7 @@ function CartIconButton({count}: {count: number | null}) {
     <button
       type="button"
       aria-label={`Cart${count ? `, ${count} items` : ''}`}
+      title="Cart"
       onClick={() => {
         open('cart');
         publish('cart_viewed', {
@@ -229,24 +260,7 @@ function PrimaryNav({
         <PrimaryNavItem to="/" end label="Home" />
         <PrimaryNavItem to="/collections/all" label="Catalog" />
         <PrimaryNavItem to="/pages/contact" label="Contact" />
-        <li className="relative group">
-          <NavLink
-            to="/collections"
-            prefetch="intent"
-            className={({isActive}) =>
-              `inline-flex items-center gap-1 hover:text-nexgen-night transition ${
-                isActive ? 'text-nexgen-night' : ''
-              }`
-            }
-          >
-            All collections
-            <ChevronDown className="size-3.5 opacity-70" />
-          </NavLink>
-          <CollectionsMegaMenu
-            header={header}
-            publicStoreDomain={publicStoreDomain}
-          />
-        </li>
+        <PrimaryNavItem to="/collections" label="All collections" />
       </ul>
     </nav>
   );
@@ -321,15 +335,33 @@ function CollectionsMegaMenu({
 
 /* --------------------- Mobile menu trigger ----------------------- */
 function MobileMenuButton() {
-  const {open} = useAside();
+  const {open, type} = useAside();
+  const isOpen = type === 'mobile';
   return (
     <button
       type="button"
       onClick={() => open('mobile')}
       aria-label="Open menu"
-      className="sm:hidden inline-flex size-10 items-center justify-center rounded-full text-nexgen-night hover:bg-nexgen-mist transition"
+      aria-expanded={isOpen}
+      aria-controls="mobile-menu-aside"
+      className="sm:hidden inline-flex size-11 items-center justify-center rounded-full text-nexgen-night hover:bg-nexgen-mist focus-visible:bg-nexgen-mist transition"
     >
       <BurgerIcon />
+    </button>
+  );
+}
+
+/* --------------------- Mobile search trigger --------------------- */
+function MobileSearchButton() {
+  const {open} = useAside();
+  return (
+    <button
+      type="button"
+      onClick={() => open('search')}
+      aria-label="Open search"
+      className="sm:hidden inline-flex size-11 items-center justify-center rounded-full text-nexgen-night hover:bg-nexgen-mist transition"
+    >
+      <SearchIcon />
     </button>
   );
 }

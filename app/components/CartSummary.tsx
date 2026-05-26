@@ -56,42 +56,107 @@ function CartDiscounts({
       ?.filter((discount) => discount.applicable)
       ?.map(({code}) => code) || [];
 
+  // Track the apply form so we can surface success / error messages.
+  const discountFetcher = useFetcher<{
+    errors?: Array<{message?: string; code?: string}>;
+    warnings?: Array<{message?: string; code?: string}>;
+    cart?: CartApiQueryFragment | null;
+  }>({key: 'discount-apply'});
+  const discountInput = useRef<HTMLInputElement>(null);
+  const isApplying = discountFetcher.state !== 'idle';
+
+  const submittedCode = (
+    discountFetcher.formData?.get('discountCode') ?? ''
+  )
+    .toString()
+    .trim()
+    .toUpperCase();
+
+  // After the action finishes, decide whether the typed code stuck.
+  let message: {tone: 'success' | 'error'; text: string} | null = null;
+  if (!isApplying && discountFetcher.data && submittedCode) {
+    const applied = (discountFetcher.data.cart?.discountCodes ?? []).some(
+      (d) => d?.applicable && d?.code?.toUpperCase() === submittedCode,
+    );
+    const serverMsg =
+      discountFetcher.data.errors?.[0]?.message ||
+      discountFetcher.data.warnings?.[0]?.message;
+    if (applied) {
+      message = {tone: 'success', text: `Code "${submittedCode}" applied.`};
+    } else {
+      message = {
+        tone: 'error',
+        text:
+          serverMsg ||
+          `"${submittedCode}" isn't a valid discount code. Please try another.`,
+      };
+    }
+  }
+
+  // Clear the text input after a successful apply.
+  useEffect(() => {
+    if (message?.tone === 'success' && discountInput.current) {
+      discountInput.current.value = '';
+    }
+  }, [message?.tone]);
+
   return (
     <div>
       {/* Have existing discount, display it with a remove option */}
-      <dl hidden={!codes.length}>
-        <div>
-          <dt>Discount(s)</dt>
-          <UpdateDiscountForm>
-            <div className="cart-discount">
-              <code>{codes?.join(', ')}</code>
-              &nbsp;
-              <button type="submit" aria-label="Remove discount">
-                Remove
-              </button>
-            </div>
-          </UpdateDiscountForm>
-        </div>
-      </dl>
+      {codes.length > 0 && (
+        <UpdateDiscountForm>
+          <div className="flex items-center justify-between rounded-full bg-nexgen-teal/10 dark:bg-nexgen-teal/15 px-4 py-2 text-sm">
+            <span className="font-semibold text-nexgen-teal dark:text-nexgen-teal/90">
+              <span aria-hidden>✓</span> {codes.join(', ')}
+            </span>
+            <button
+              type="submit"
+              aria-label="Remove discount"
+              className="text-xs font-semibold text-nexgen-night/60 dark:text-slate-400 hover:text-nexgen-night dark:hover:text-white underline-offset-2 hover:underline"
+            >
+              Remove
+            </button>
+          </div>
+        </UpdateDiscountForm>
+      )}
 
       {/* Show an input to apply a discount */}
-      <UpdateDiscountForm discountCodes={codes}>
-        <div className="flex items-stretch gap-2">
-          <label htmlFor="discount-code-input" className="sr-only">Discount code</label>
-          <input
-            id="discount-code-input"
-            type="text"
-            name="discountCode"
-            placeholder="Discount code"
-            className="flex-1 min-w-0 rounded-full bg-nexgen-mist dark:bg-white/5 ring-1 ring-transparent focus:ring-nexgen-purple/40 focus:bg-white dark:focus:bg-white/10 px-4 py-2 text-sm text-nexgen-night dark:text-white placeholder:text-nexgen-night/45 dark:placeholder:text-slate-500 outline-none transition"
-          />
-          <button
-            type="submit"
-            aria-label="Apply discount code"
-            className="shrink-0 rounded-full bg-nexgen-night dark:bg-white/15 text-white font-semibold px-4 py-2 text-sm hover:bg-nexgen-night/90 dark:hover:bg-white/25 transition"
-          >
-            Apply
-          </button>
+      <UpdateDiscountForm discountCodes={codes} fetcherKey="discount-apply">
+        <div className={codes.length > 0 ? 'mt-2' : ''}>
+          <div className="flex items-stretch gap-2">
+            <label htmlFor="discount-code-input" className="sr-only">
+              Discount code
+            </label>
+            <input
+              id="discount-code-input"
+              ref={discountInput}
+              type="text"
+              name="discountCode"
+              placeholder="Discount code"
+              autoComplete="off"
+              className="flex-1 min-w-0 rounded-full bg-nexgen-mist dark:bg-white/5 ring-1 ring-transparent focus:ring-nexgen-purple/40 focus:bg-white dark:focus:bg-white/10 px-4 py-2 text-sm text-nexgen-night dark:text-white placeholder:text-nexgen-night/45 dark:placeholder:text-slate-500 outline-none transition"
+            />
+            <button
+              type="submit"
+              disabled={isApplying}
+              aria-label="Apply discount code"
+              className="shrink-0 rounded-full bg-nexgen-night dark:bg-white/15 text-white font-semibold px-4 py-2 text-sm hover:bg-nexgen-night/90 dark:hover:bg-white/25 disabled:opacity-50 transition"
+            >
+              {isApplying ? 'Applying…' : 'Apply'}
+            </button>
+          </div>
+          {message && (
+            <p
+              role={message.tone === 'error' ? 'alert' : 'status'}
+              className={`mt-2 text-xs font-medium ${
+                message.tone === 'success'
+                  ? 'text-nexgen-teal dark:text-nexgen-teal/90'
+                  : 'text-rose-600 dark:text-rose-400'
+              }`}
+            >
+              {message.text}
+            </p>
+          )}
         </div>
       </UpdateDiscountForm>
     </div>
@@ -101,13 +166,16 @@ function CartDiscounts({
 function UpdateDiscountForm({
   discountCodes,
   children,
+  fetcherKey,
 }: {
   discountCodes?: string[];
   children: React.ReactNode;
+  fetcherKey?: string;
 }) {
   return (
     <CartForm
       route="/cart"
+      fetcherKey={fetcherKey}
       action={CartForm.ACTIONS.DiscountCodesUpdate}
       inputs={{
         discountCodes: discountCodes || [],

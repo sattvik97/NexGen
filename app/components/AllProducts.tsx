@@ -1,6 +1,7 @@
-import {useMemo, useState} from 'react';
-import {Link} from 'react-router';
+import {useEffect, useMemo, useState} from 'react';
+import {Link, useFetcher} from 'react-router';
 import {motion, AnimatePresence} from 'framer-motion';
+import {useAside} from '~/components/Aside';
 import {
   NEXGEN_PRODUCTS,
   NEXGEN_CATEGORIES,
@@ -9,6 +10,7 @@ import {
   type NexGenProduct,
 } from '~/data/nexgenCatalog';
 import {MagneticTilt} from '~/components/MagneticTilt';
+import {FavoriteButton} from '~/components/FavoriteButton';
 
 type Filter = 'all' | NexGenCategoryHandle;
 
@@ -72,7 +74,11 @@ export function AllProducts() {
         </motion.div>
 
         {/* Filter chips */}
-        <div className="mt-8 flex flex-wrap gap-2 overflow-x-auto -mx-1 px-1 pb-1">
+        <div
+          className="mt-8 flex flex-wrap gap-2 overflow-x-auto -mx-1 px-1 pb-1"
+          role="group"
+          aria-label="Filter products by category"
+        >
           {FILTER_CHIPS.map((chip) => {
             const active = filter === chip.key;
             return (
@@ -134,8 +140,18 @@ function ProductCard({product, index}: {product: NexGenProduct; index: number}) 
           {/* Badges */}
           {product.badge && <Badge type={product.badge} />}
 
-          {/* Quick add hint */}
-          <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+          {/* Favorite */}
+          <FavoriteButton
+            floating
+            handle={product.handle}
+            title={product.title}
+            image={product.image}
+            priceINR={product.priceINR}
+            mrpINR={product.mrpINR}
+          />
+
+          {/* Quick view hint — visible on touch devices, slides up on hover */}
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 motion-safe:transition-transform motion-safe:duration-300 [@media(hover:hover)]:translate-y-full group-hover:translate-y-0">
             <div className="m-2 rounded-2xl bg-nexgen-night/85 backdrop-blur text-white text-center text-xs font-semibold py-2.5">
               View details →
             </div>
@@ -156,17 +172,12 @@ function ProductCard({product, index}: {product: NexGenProduct; index: number}) 
           {product.title}
         </Link>
         <div className="mt-auto flex items-center justify-between pt-2">
-          <span className="font-display font-extrabold text-base sm:text-lg text-nexgen-night">
-            {formatINR(product.priceINR)}
-          </span>
-          <button
-            type="button"
-            aria-label={`Add ${product.title} to cart`}
-            disabled={product.badge === 'sold-out'}
-            className="inline-flex size-9 items-center justify-center rounded-full nexgen-gradient text-white shadow-md shadow-nexgen-orange/30 hover:scale-110 active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed disabled:saturate-50"
-          >
-            <PlusIcon />
-          </button>
+          <PriceWithMrp price={product.priceINR} mrp={product.mrpINR} />
+          <QuickAddButton
+            handle={product.handle}
+            title={product.title}
+            soldOut={product.badge === 'sold-out'}
+          />
         </div>
       </div>
         </div>
@@ -197,5 +208,117 @@ function PlusIcon() {
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" aria-hidden>
       <path d="M12 5v14M5 12h14" />
     </svg>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M5 12l5 5L20 7" />
+    </svg>
+  );
+}
+
+function SpinnerIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" aria-hidden className="animate-spin">
+      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+    </svg>
+  );
+}
+
+/**
+ * Quick-add button — posts to /cart/add/:handle which resolves the
+ * first available variant for the handle and adds 1 unit to the cart.
+ * Uses a fetcher so the homepage stays put while adding.
+ */
+function QuickAddButton({
+  handle,
+  title,
+  soldOut,
+}: {
+  handle: string;
+  title: string;
+  soldOut: boolean;
+}) {
+  const fetcher = useFetcher<{ok?: boolean}>();
+  const {open} = useAside();
+  const isAdding = fetcher.state !== 'idle';
+  const justAdded =
+    fetcher.state === 'idle' && fetcher.data?.ok === true;
+
+  // Pop the cart drawer once the line has been added.
+  useEffect(() => {
+    if (justAdded) {
+      open('cart');
+    }
+  }, [justAdded, open]);
+
+  if (soldOut) {
+    return (
+      <span
+        aria-label="Sold out"
+        className="inline-flex size-9 items-center justify-center rounded-full bg-nexgen-night/10 text-nexgen-night/40"
+      >
+        <PlusIcon />
+      </span>
+    );
+  }
+
+  return (
+    <fetcher.Form method="post" action={`/cart/add/${handle}`}>
+      <input type="hidden" name="redirectTo" value="/cart" />
+      <button
+        type="submit"
+        aria-label={`Add ${title} to cart`}
+        disabled={isAdding}
+        className={`inline-flex size-9 items-center justify-center rounded-full text-white shadow-md hover:scale-110 active:scale-95 motion-safe:transition disabled:opacity-80 ${
+          justAdded
+            ? 'bg-nexgen-teal shadow-nexgen-teal/40'
+            : 'nexgen-gradient shadow-nexgen-orange/30'
+        }`}
+      >
+        {isAdding ? <SpinnerIcon /> : justAdded ? <CheckIcon /> : <PlusIcon />}
+      </button>
+    </fetcher.Form>
+  );
+}
+
+/**
+ * Selling price + struck-through MRP. Every product shows a 50–52% discount;
+ * the exact percentage is derived deterministically from the price so the
+ * number is stable across renders. An explicit `mrp` (if provided and higher
+ * than the selling price) wins over the derived value.
+ */
+function PriceWithMrp({price, mrp}: {price: number; mrp?: number}) {
+  // Deterministic discount in [50, 52] driven by the price itself.
+  const pct = 50 + (Math.abs(Math.round(price)) % 3); // 50, 51, or 52
+  const derivedMrp = Math.round((price / (1 - pct / 100)) / 10) * 10;
+  const effectiveMrp = mrp && mrp > price ? mrp : derivedMrp;
+  const showMrp = effectiveMrp > price;
+  const displayPct = showMrp
+    ? Math.round(((effectiveMrp - price) / effectiveMrp) * 100)
+    : 0;
+  return (
+    <div className="tabular-nums">
+      <div className="flex flex-wrap items-baseline gap-1.5">
+        <span className="font-display font-extrabold text-base sm:text-lg text-nexgen-night">
+          {formatINR(price)}
+        </span>
+        {showMrp && (
+          <>
+            <s className="text-xs font-semibold text-nexgen-night/40">
+              {formatINR(effectiveMrp)}
+            </s>
+            <span className="text-[10px] font-bold uppercase tracking-wide text-nexgen-orange">
+              {displayPct}% off
+            </span>
+          </>
+        )}
+      </div>
+      <p className="mt-0.5 text-[10px] font-medium text-nexgen-night/55">
+        excluding GST
+      </p>
+    </div>
   );
 }

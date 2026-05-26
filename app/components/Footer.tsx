@@ -112,6 +112,24 @@ const FALLBACK_FOOTER_MENU = {
       url: '/policies/terms-of-service',
       items: [],
     },
+    {
+      id: 'gid://shopify/MenuItem/nexgen-cookie-policy',
+      resourceId: null,
+      tags: [],
+      title: 'Cookie Policy',
+      type: 'HTTP',
+      url: '/policies/cookie-policy',
+      items: [],
+    },
+    {
+      id: 'gid://shopify/MenuItem/nexgen-accessibility',
+      resourceId: null,
+      tags: [],
+      title: 'Accessibility',
+      type: 'HTTP',
+      url: '/policies/accessibility-statement',
+      items: [],
+    },
   ],
 };
 

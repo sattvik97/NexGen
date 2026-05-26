@@ -487,6 +487,28 @@
   .dark body::after {
     animation: none;
   }
+  /* Globally suppress motion for users who request reduced motion.
+     Preserves opacity/colour transitions but kills movement & long animations. */
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Improve tap targets on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  button, [role='button'], a {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Stronger focus ring for keyboard users (a11y) */
+:focus-visible {
+  outline: 3px solid var(--color-nexgen-orange, #FF6B35);
+  outline-offset: 3px;
+  border-radius: 0.5rem;
 }
 
 /* Skeleton-shipped raw CSS classes */

@@ -1,11 +1,9 @@
 import {Link, useLoaderData} from 'react-router';
 import type {Route} from './+types/policies.$handle';
-import {type Shop} from '@shopify/hydrogen/storefront-api-types';
-
-type SelectedPolicies = keyof Pick<
-  Shop,
-  'privacyPolicy' | 'shippingPolicy' | 'termsOfService' | 'refundPolicy'
->;
+import {
+  NEXGEN_POLICIES,
+  type NexGenPolicyHandle,
+} from '~/data/nexgenPolicies';
 
 export const meta: Route.MetaFunction = ({data}) => {
   return [{title: `${data?.policy.title ?? 'Policy'} | NexGen Toys`}];
@@ -16,24 +14,14 @@ export async function loader({params, context}: Route.LoaderArgs) {
     throw new Response('No handle was passed in', {status: 404});
   }
 
-  const policyName = params.handle.replace(
-    /-([a-z])/g,
-    (_: unknown, m1: string) => m1.toUpperCase(),
-  ) as SelectedPolicies;
+  const handle = params.handle as NexGenPolicyHandle;
+  const fallback = NEXGEN_POLICIES[handle];
 
-  const data = await context.storefront.query(POLICY_CONTENT_QUERY, {
-    variables: {
-      privacyPolicy: false,
-      shippingPolicy: false,
-      termsOfService: false,
-      refundPolicy: false,
-      [policyName]: true,
-      language: context.storefront.i18n?.language,
-    },
-  });
-
-  const policy = data.shop?.[policyName];
-
+  // NexGen Toys policies are authored locally (see app/data/nexgenPolicies.ts)
+  // so the content we ship is always the source of truth. We no longer fetch
+  // from the Shopify Storefront API here — the upstream mock.shop store
+  // returns generic policy text that would otherwise override our own.
+  const policy = fallback;
   if (!policy) {
     throw new Response('Could not find the policy', {status: 404});
   }
@@ -56,43 +44,29 @@ export default function Policy() {
       <div className="mx-auto max-w-3xl px-5 sm:px-6 lg:px-10 py-10 sm:py-14">
         <div
           dangerouslySetInnerHTML={{__html: policy.body}}
-          className="prose prose-sm sm:prose-base max-w-none text-nexgen-night/85 dark:text-slate-300 [&_h2]:font-display [&_h2]:font-black [&_h2]:text-nexgen-night dark:[&_h2]:text-white [&_h3]:font-display [&_h3]:font-bold [&_h3]:text-nexgen-night dark:[&_h3]:text-white [&_a]:text-nexgen-orange [&_a]:underline [&_strong]:text-nexgen-night dark:[&_strong]:text-white"
+          className={[
+            'max-w-none text-[15px] sm:text-base leading-7 sm:leading-8 text-nexgen-night/85 dark:text-slate-300',
+            // Paragraphs
+            '[&_p]:my-4 [&_p]:first:mt-0',
+            // Headings
+            '[&_h2]:font-display [&_h2]:font-black [&_h2]:text-nexgen-night dark:[&_h2]:text-white',
+            '[&_h2]:text-2xl sm:[&_h2]:text-3xl [&_h2]:tracking-tight [&_h2]:mt-10 [&_h2]:mb-3 [&_h2]:first:mt-0',
+            '[&_h3]:font-display [&_h3]:font-bold [&_h3]:text-nexgen-night dark:[&_h3]:text-white',
+            '[&_h3]:text-lg sm:[&_h3]:text-xl [&_h3]:mt-6 [&_h3]:mb-2',
+            // Lists
+            '[&_ul]:my-4 [&_ul]:pl-6 [&_ul]:list-disc [&_ul]:space-y-2',
+            '[&_ol]:my-4 [&_ol]:pl-6 [&_ol]:list-decimal [&_ol]:space-y-2',
+            '[&_li]:marker:text-nexgen-orange [&_li>p]:my-1',
+            // Links & emphasis
+            '[&_a]:text-nexgen-orange [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-nexgen-purple',
+            '[&_strong]:font-semibold [&_strong]:text-nexgen-night dark:[&_strong]:text-white',
+            // Horizontal rule between sections (optional, leaves visual breathing room)
+            '[&_hr]:my-8 [&_hr]:border-nexgen-night/10 dark:[&_hr]:border-white/10',
+          ].join(' ')}
         />
       </div>
     </article>
   );
 }
 
-// NOTE: https://shopify.dev/docs/api/storefront/latest/objects/Shop
-const POLICY_CONTENT_QUERY = `#graphql
-  fragment Policy on ShopPolicy {
-    body
-    handle
-    id
-    title
-    url
-  }
-  query Policy(
-    $country: CountryCode
-    $language: LanguageCode
-    $privacyPolicy: Boolean!
-    $refundPolicy: Boolean!
-    $shippingPolicy: Boolean!
-    $termsOfService: Boolean!
-  ) @inContext(language: $language, country: $country) {
-    shop {
-      privacyPolicy @include(if: $privacyPolicy) {
-        ...Policy
-      }
-      shippingPolicy @include(if: $shippingPolicy) {
-        ...Policy
-      }
-      termsOfService @include(if: $termsOfService) {
-        ...Policy
-      }
-      refundPolicy @include(if: $refundPolicy) {
-        ...Policy
-      }
-    }
-  }
-` as const;
+

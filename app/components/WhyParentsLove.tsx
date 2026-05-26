@@ -28,15 +28,9 @@ const PROMISES = [
   },
   {
     title: 'Fast Delivery',
-    body: 'Pan-India dispatch within 24 hours. COD available everywhere.',
+    body: 'Pan-India dispatch within 24 hours. Most metros land in 2–3 business days.',
     icon: '🚚',
     tint: 'bg-nexgen-teal/10 text-nexgen-teal',
-  },
-  {
-    title: 'Easy Returns',
-    body: 'Changed your mind? 30-day no-questions-asked returns. Period.',
-    icon: '↩️',
-    tint: 'bg-nexgen-purple/10 text-nexgen-purple',
   },
 ];
 
@@ -49,14 +43,14 @@ export function WhyParentsLove() {
             Why Parents Love NexGen
           </span>
           <h2 className="mt-3 text-4xl sm:text-5xl">
-            Six promises we keep, every order.
+            Five promises we keep, every order.
           </h2>
           <p className="mt-4 text-nexgen-slate text-lg">
             We obsess over the small things so you don&apos;t have to.
           </p>
         </div>
 
-        <ul className="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <ul className="mt-16 flex flex-wrap justify-center gap-6">
           {PROMISES.map((p, i) => (
             <motion.li
               key={p.title}
@@ -64,9 +58,10 @@ export function WhyParentsLove() {
               whileInView={{opacity: 1, y: 0}}
               viewport={{once: true, margin: '-80px'}}
               transition={{duration: 0.45, delay: i * 0.05, ease: 'easeOut'}}
+              className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]"
             >
               <MagneticTilt intensity={0.7} scale={1.02} rounded="rounded-3xl">
-                <div className="rounded-3xl bg-white p-7 shadow-soft ring-1 ring-nexgen-ink/5">
+                <div className="h-full rounded-3xl bg-white p-7 shadow-soft ring-1 ring-nexgen-ink/5">
                   <span
                     className={`inline-flex size-12 items-center justify-center rounded-2xl text-2xl ${p.tint}`}
                     aria-hidden

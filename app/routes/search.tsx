@@ -1,13 +1,17 @@
 import {useLoaderData} from 'react-router';
 import type {Route} from './+types/search';
 import {getPaginationVariables, Analytics} from '@shopify/hydrogen';
-import {SearchForm} from '~/components/SearchForm';
 import {SearchResults} from '~/components/SearchResults';
 import {
   type RegularSearchReturn,
   type PredictiveSearchReturn,
   getEmptyPredictiveSearchResult,
 } from '~/lib/search';
+import {
+  searchLocalCatalog,
+  toRegularSearchProductNode,
+  toPredictiveSearchProductNode,
+} from '~/lib/localSearch';
 import type {
   RegularSearchQuery,
   PredictiveSearchQuery,
@@ -46,29 +50,12 @@ export default function SearchPage() {
         <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_70%_30%,white_0%,transparent_45%)]" aria-hidden />
         <div className="relative mx-auto max-w-4xl px-5 sm:px-6 lg:px-10 py-12 sm:py-16">
           <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/80">Search</p>
-          <h1 className="mt-2 font-display font-black text-4xl sm:text-5xl tracking-tight">What are you looking for?</h1>
-          <div className="mt-6">
-            <SearchForm>
-              {({inputRef}) => (
-                <div className="flex items-stretch gap-2 bg-white dark:bg-[#0d1326] rounded-full p-1.5 shadow-xl ring-1 ring-white/10">
-                  <input
-                    defaultValue={term}
-                    name="q"
-                    placeholder="Search products, pages, articles…"
-                    ref={inputRef}
-                    type="search"
-                    className="flex-1 min-w-0 bg-transparent px-4 py-2.5 text-base text-nexgen-night dark:text-white placeholder:text-nexgen-night/45 dark:placeholder:text-slate-500 outline-none"
-                  />
-                  <button
-                    type="submit"
-                    className="shrink-0 rounded-full bg-gradient-to-r from-nexgen-orange to-nexgen-purple text-white font-bold px-6 py-2.5 text-sm hover:scale-[1.03] active:scale-95 transition"
-                  >
-                    Search
-                  </button>
-                </div>
-              )}
-            </SearchForm>
-          </div>
+          <h1 className="mt-2 font-display font-black text-4xl sm:text-5xl tracking-tight">
+            {term ? <>Results for <span className="text-nexgen-yellow">“{term}”</span></> : 'What are you looking for?'}
+          </h1>
+          <p className="mt-3 text-white/80 text-sm sm:text-base">
+            Use the search bar at the top of the page to find products, pages and articles.
+          </p>
         </div>
       </section>
       <div className="mx-auto max-w-4xl px-5 sm:px-6 lg:px-10 py-10 sm:py-14">
@@ -253,6 +240,27 @@ async function regularSearch({
     throw new Error('No search data returned from Shopify API');
   }
 
+  // Merge in local NexGen catalog matches so fuzzy / typo / category
+  // searches (e.g. "helicoppter") still surface real NexGen products
+  // even when the upstream Shopify catalog returns nothing.
+  const localMatches = searchLocalCatalog(term);
+  if (localMatches.length) {
+    const existingHandles = new Set(
+      (items.products?.nodes ?? []).map(
+        (n: {handle?: string | null} | null) => n?.handle,
+      ),
+    );
+    const extra = localMatches
+      .filter((p) => !existingHandles.has(p.handle))
+      .map(toRegularSearchProductNode);
+    if (extra.length) {
+      items.products = {
+        ...(items.products ?? {pageInfo: {hasNextPage: false, hasPreviousPage: false, startCursor: null, endCursor: null}}),
+        nodes: [...(items.products?.nodes ?? []), ...extra],
+      } as RegularSearchQuery['products'];
+    }
+  }
+
   const total = Object.values(items).reduce(
     (acc: number, {nodes}: {nodes: Array<unknown>}) => acc + nodes.length,
     0,
@@ -430,6 +438,24 @@ async function predictiveSearch({
 
   if (!items) {
     throw new Error('No predictive search data returned from Shopify API');
+  }
+
+  // Enrich predictive results with local NexGen catalog so typing
+  // "helicop" or "cyber" surfaces the real products even on mock.shop.
+  const localMatches = searchLocalCatalog(term);
+  if (localMatches.length) {
+    const existingHandles = new Set(
+      (items.products ?? []).map(
+        (n: {handle?: string | null} | null) => n?.handle,
+      ),
+    );
+    const extra = localMatches
+      .filter((p) => !existingHandles.has(p.handle))
+      .slice(0, limit)
+      .map(toPredictiveSearchProductNode);
+    if (extra.length) {
+      items.products = [...(items.products ?? []), ...extra].slice(0, limit) as typeof items.products;
+    }
   }
 
   const total = Object.values(items).reduce(

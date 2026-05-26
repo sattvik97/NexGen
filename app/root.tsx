@@ -314,6 +314,7 @@ export default function App() {
 
 export function ErrorBoundary() {
   const error = useRouteError();
+  const rootData = useRouteLoaderData<RootLoader>('root');
   let errorMessage = 'Unknown error';
   let errorStatus = 500;
 
@@ -324,15 +325,70 @@ export function ErrorBoundary() {
     errorMessage = error.message;
   }
 
-  return (
-    <div className="route-error">
-      <h1>Oops</h1>
-      <h2>{errorStatus}</h2>
-      {errorMessage && (
-        <fieldset>
-          <pre>{errorMessage}</pre>
-        </fieldset>
-      )}
-    </div>
+  const isNotFound = errorStatus === 404;
+  const heading = isNotFound ? 'Page not found' : 'Something went wrong';
+  const subheading = isNotFound
+    ? "We couldn't find what you were looking for. It might have moved, or never existed."
+    : "Our team has been notified. Please try again in a moment.";
+
+  const content = (
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="bg-nexgen-mist dark:bg-[#070b1a] min-h-[60vh]"
+    >
+      <div className="mx-auto max-w-2xl px-6 py-20 sm:py-28 text-center">
+        <p className="text-[11px] font-bold uppercase tracking-[0.32em] text-nexgen-purple">
+          Error {errorStatus}
+        </p>
+        <h1 className="mt-3 font-display font-black text-4xl sm:text-5xl text-nexgen-night dark:text-white tracking-tight">
+          {heading}
+        </h1>
+        <p className="mt-4 text-base sm:text-lg text-nexgen-night/70 dark:text-slate-300">
+          {subheading}
+        </p>
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <a
+            href="/"
+            className="inline-flex items-center gap-2 rounded-full nexgen-gradient text-white px-6 py-3 text-sm font-bold uppercase tracking-wider shadow-lg shadow-nexgen-orange/30 hover:-translate-y-0.5 transition"
+          >
+            Go to homepage
+          </a>
+          <a
+            href="/collections/all"
+            className="inline-flex items-center gap-2 rounded-full bg-white dark:bg-white/10 ring-1 ring-nexgen-night/15 dark:ring-white/20 text-nexgen-night dark:text-white px-6 py-3 text-sm font-semibold hover:bg-nexgen-mist dark:hover:bg-white/15 transition"
+          >
+            Browse all toys
+          </a>
+        </div>
+        {!isNotFound && errorMessage && (
+          <details className="mt-10 text-left rounded-2xl bg-white dark:bg-white/5 ring-1 ring-nexgen-night/10 dark:ring-white/10 p-4 text-xs text-nexgen-night/70 dark:text-slate-300">
+            <summary className="cursor-pointer font-semibold">
+              Technical details
+            </summary>
+            <pre className="mt-3 whitespace-pre-wrap break-words font-mono">
+              {errorMessage}
+            </pre>
+          </details>
+        )}
+      </div>
+    </main>
   );
+
+  // When root loader data is available, wrap the error page in the full
+  // site chrome (header + footer + asides) so 404s and runtime errors
+  // still feel like the rest of the site.
+  if (rootData) {
+    return (
+      <Analytics.Provider
+        cart={rootData.cart}
+        shop={rootData.shop}
+        consent={rootData.consent}
+      >
+        <PageLayout {...rootData}>{content}</PageLayout>
+      </Analytics.Provider>
+    );
+  }
+
+  return content;
 }

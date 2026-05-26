@@ -97,6 +97,30 @@ export default function Product() {
 
   const {title, descriptionHtml, vendor} = product;
 
+  // Every product shows a 50–52% discount. Honour Shopify's compareAtPrice
+  // when set; otherwise derive a deterministic MRP from the selling price so
+  // the strikethrough is always visible.
+  const sellingPrice = selectedVariant?.price;
+  const shopifyCompareAt = selectedVariant?.compareAtPrice;
+  let displayCompareAt = shopifyCompareAt;
+  if (sellingPrice) {
+    const sell = parseFloat(sellingPrice.amount);
+    if (
+      !shopifyCompareAt ||
+      parseFloat(shopifyCompareAt.amount) <= sell
+    ) {
+      const handleHash = (product.handle || '')
+        .split('')
+        .reduce((acc, c) => acc + c.charCodeAt(0), 0);
+      const pct = 50 + (handleHash % 3);
+      const derived = Math.round(sell / (1 - pct / 100) / 10) * 10;
+      displayCompareAt = {
+        amount: String(derived),
+        currencyCode: sellingPrice.currencyCode,
+      };
+    }
+  }
+
   return (
     <div className="bg-nexgen-mist dark:bg-[#070b1a]">
       <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-10 py-8 sm:py-12">
@@ -114,7 +138,7 @@ export default function Product() {
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
           {/* Gallery */}
           <div className="lg:sticky lg:top-[180px]">
-            <ProductImage image={selectedVariant?.image} />
+            <ProductImage image={selectedVariant?.image} handle={product.handle} />
           </div>
 
           {/* Info card */}
@@ -127,8 +151,8 @@ export default function Product() {
             </h1>
             <div className="mt-4 text-2xl sm:text-3xl font-display font-black text-nexgen-night dark:text-white">
               <ProductPrice
-                price={selectedVariant?.price}
-                compareAtPrice={selectedVariant?.compareAtPrice}
+                price={sellingPrice}
+                compareAtPrice={displayCompareAt}
               />
             </div>
 
@@ -136,7 +160,6 @@ export default function Product() {
             <div className="mt-5 flex flex-wrap gap-2 text-[11px] font-semibold">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-nexgen-teal/10 dark:bg-nexgen-teal/15 text-nexgen-teal px-3 py-1"><span aria-hidden>🛡️</span> BIS Certified</span>
               <span className="inline-flex items-center gap-1.5 rounded-full bg-nexgen-orange/10 dark:bg-nexgen-orange/15 text-nexgen-orange px-3 py-1"><span aria-hidden>🚚</span> Ships in 24h</span>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-nexgen-purple/10 dark:bg-nexgen-purple/15 text-nexgen-purple px-3 py-1"><span aria-hidden>↩️</span> 30-Day Returns</span>
             </div>
 
             <div className="mt-6">
