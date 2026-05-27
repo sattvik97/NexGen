@@ -4,15 +4,11 @@ import {motion} from 'framer-motion';
 import {Product360Viewer} from '~/components/Product360Viewer';
 
 const STORY_IMAGE =
-  'https://nexgen.toys/cdn/shop/files/ChatGPTImageMay18_2026_11_27_29AM.png?v=1779087548&width=720';
+  'https://cdn.shopify.com/s/files/1/0721/9704/6361/files/ChatGPTImageMay18_2026_11_27_29AM.png?v=1779087548&width=720';
 
-// Drop 36 angle photos of the Cyber Truck named frame-01.jpg ... frame-36.jpg
-// into public/products/cyber-truck-360/ and the viewer becomes interactive.
-const FRAME_COUNT = 36;
-const CYBER_TRUCK_360_FRAMES = Array.from(
-  {length: FRAME_COUNT},
-  (_, i) => `/products/cyber-truck-360/frame-${String(i + 1).padStart(2, '0')}.jpg`,
-);
+// Keep 360 frames disabled in production until actual assets are uploaded,
+// otherwise the viewer generates 36 noisy 404 requests on every page load.
+const CYBER_TRUCK_360_FRAMES: string[] = [];
 
 type Testimonial = {
   name: string;
@@ -30,7 +26,7 @@ const TESTIMONIALS: Testimonial[] = [
       handle:
         '1-18-cyber-truck-rc-car-high-speed-remote-control-electric-pickup-truck-with-led-lights-usb-charging',
       image:
-        'https://nexgen.toys/cdn/shop/files/ChatGPTImageMay18_2026_11_27_29AM.png?v=1779087548&width=240',
+        'https://cdn.shopify.com/s/files/1/0721/9704/6361/files/ChatGPTImageMay18_2026_11_27_29AM.png?v=1779087548&width=240',
     },
   },
   {
@@ -41,7 +37,7 @@ const TESTIMONIALS: Testimonial[] = [
       title: 'Pastel Bubble Gun Toy',
       handle: 'pastel-bubble-gun-toy',
       image:
-        'https://nexgen.toys/cdn/shop/files/tight_2.jpg?v=1772777507&width=240',
+        'https://cdn.shopify.com/s/files/1/0721/9704/6361/files/tight_2.jpg?v=1772777507&width=240',
     },
   },
   {
@@ -53,7 +49,7 @@ const TESTIMONIALS: Testimonial[] = [
       handle:
         'high-speed-f1-racing-remote-control-car-with-led-smoke-powerful-engine-red-edition-2-4ghz-rc-formula-car-for-kids-adults',
       image:
-        'https://nexgen.toys/cdn/shop/files/rccar_1200_clean.jpg?v=1772776885&width=240',
+        'https://cdn.shopify.com/s/files/1/0721/9704/6361/files/rccar_1200_clean.jpg?v=1772776885&width=240',
     },
   },
   {
@@ -64,7 +60,7 @@ const TESTIMONIALS: Testimonial[] = [
       title: 'Dancing Bot Robot Toy',
       handle: 'toyshine-bot-robot-pioneer-colorful-lights-music',
       image:
-        'https://nexgen.toys/cdn/shop/files/40339582_1-toyshine-toyshine-bot-robot-pioneer-colorful-lights-and-music-all-direction-movement-dancing-robot-toys-for-boys-and-girls-blue-color.webp?v=1771867566&width=240',
+        'https://cdn.shopify.com/s/files/1/0721/9704/6361/files/40339582_1-toyshine-toyshine-bot-robot-pioneer-colorful-lights-and-music-all-direction-movement-dancing-robot-toys-for-boys-and-girls-blue-color.webp?v=1771867566&width=240',
     },
   },
   {
@@ -75,7 +71,7 @@ const TESTIMONIALS: Testimonial[] = [
       title: 'Walking Dinosaur Toy',
       handle: 'walking-roaring-dinosaur-toy',
       image:
-        'https://nexgen.toys/cdn/shop/files/dinosaur_1200_clean.jpg?v=1772777028&width=240',
+        'https://cdn.shopify.com/s/files/1/0721/9704/6361/files/dinosaur_1200_clean.jpg?v=1772777028&width=240',
     },
   },
   {
@@ -86,7 +82,7 @@ const TESTIMONIALS: Testimonial[] = [
       title: 'Kids Kick Scooter',
       handle: 'kids-kick-scooter',
       image:
-        'https://nexgen.toys/cdn/shop/files/scooter_final_1200.jpg?v=1772777120&width=240',
+        'https://cdn.shopify.com/s/files/1/0721/9704/6361/files/scooter_final_1200.jpg?v=1772777120&width=240',
     },
   },
   {
@@ -97,7 +93,7 @@ const TESTIMONIALS: Testimonial[] = [
       title: 'Birthday Gift Hamper',
       handle: 'kids-gift-hamper',
       image:
-        'https://nexgen.toys/cdn/shop/files/71S-4Em2fHL._SL1500.jpg?v=1775907959&width=240',
+        'https://cdn.shopify.com/s/files/1/0721/9704/6361/files/71S-4Em2fHL._SL1500.jpg?v=1775907959&width=240',
     },
   },
   {
@@ -109,7 +105,7 @@ const TESTIMONIALS: Testimonial[] = [
       handle:
         '1-18-cyber-truck-rc-car-high-speed-remote-control-electric-pickup-truck-with-led-lights-usb-charging',
       image:
-        'https://nexgen.toys/cdn/shop/files/ChatGPTImageMay18_2026_11_27_29AM.png?v=1779087548&width=240',
+        'https://cdn.shopify.com/s/files/1/0721/9704/6361/files/ChatGPTImageMay18_2026_11_27_29AM.png?v=1779087548&width=240',
     },
   },
   {
@@ -120,7 +116,7 @@ const TESTIMONIALS: Testimonial[] = [
       title: 'Pastel Bubble Gun Toy',
       handle: 'pastel-bubble-gun-toy',
       image:
-        'https://nexgen.toys/cdn/shop/files/tight_2.jpg?v=1772777507&width=240',
+        'https://cdn.shopify.com/s/files/1/0721/9704/6361/files/tight_2.jpg?v=1772777507&width=240',
     },
   },
 ];

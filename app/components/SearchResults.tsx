@@ -120,7 +120,7 @@ function SearchResultsProducts({
               if (!shopifyCompareAt || parseFloat(shopifyCompareAt.amount) <= sell) {
                 const handleHash = (product.handle || '')
                   .split('')
-                  .reduce((acc, c) => acc + c.charCodeAt(0), 0);
+                  .reduce((acc: number, c: string) => acc + c.charCodeAt(0), 0);
                 const pct = 50 + (handleHash % 3);
                 const derived = Math.round(sell / (1 - pct / 100) / 10) * 10;
                 compareAt = {
@@ -149,7 +149,7 @@ function SearchResultsProducts({
                     <p className="font-display font-bold text-nexgen-night dark:text-white line-clamp-2">{product.title}</p>
                     <span className="mt-1 inline-flex flex-wrap items-baseline gap-2 text-sm font-display font-black text-nexgen-purple dark:text-nexgen-yellow tabular-nums">
                       {price && <Money data={price} />}
-                      {hasMrp && (
+                      {hasMrp && compareAt && (
                         <s className="text-xs font-semibold text-nexgen-night/45 dark:text-slate-500">
                           <Money data={compareAt} />
                         </s>

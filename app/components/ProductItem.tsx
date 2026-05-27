@@ -3,7 +3,6 @@ import {Image, Money} from '@shopify/hydrogen';
 import type {
   ProductItemFragment,
   CollectionItemFragment,
-  RecommendedProductFragment,
 } from 'storefrontapi.generated';
 import {useVariantUrl} from '~/lib/variants';
 import {FavoriteButton} from '~/components/FavoriteButton';
@@ -14,8 +13,7 @@ export function ProductItem({
 }: {
   product:
     | CollectionItemFragment
-    | ProductItemFragment
-    | RecommendedProductFragment;
+    | ProductItemFragment;
   loading?: 'eager' | 'lazy';
 }) {
   const variantUrl = useVariantUrl(product.handle);
@@ -31,7 +29,7 @@ export function ProductItem({
   // with a deterministic per-handle percentage so it stays stable.
   const handleHash = (product.handle || '')
     .split('')
-    .reduce((acc, c) => acc + c.charCodeAt(0), 0);
+    .reduce((acc: number, c: string) => acc + c.charCodeAt(0), 0);
   const pct = 50 + (handleHash % 3); // 50 | 51 | 52
   const derivedAmount =
     Math.round((priceAmount / (1 - pct / 100)) / 10) * 10;

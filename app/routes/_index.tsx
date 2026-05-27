@@ -1,13 +1,30 @@
+import {lazy, Suspense} from 'react';
 import {useLoaderData} from 'react-router';
 import type {Route} from './+types/_index';
 import {MockShopNotice} from '~/components/MockShopNotice';
 import {NexGenHero} from '~/components/NexGenHero';
 import {FeaturedCategories} from '~/components/FeaturedCategories';
 import {ShopByAge} from '~/components/ShopByAge';
-import {AllProducts} from '~/components/AllProducts';
-import {WhyParentsLove} from '~/components/WhyParentsLove';
-import {NexGenStory} from '~/components/NexGenStory';
-import {NewsletterCTA} from '~/components/NewsletterCTA';
+
+const AllProducts = lazy(async () => {
+  const module = await import('~/components/AllProducts');
+  return {default: module.AllProducts};
+});
+
+const WhyParentsLove = lazy(async () => {
+  const module = await import('~/components/WhyParentsLove');
+  return {default: module.WhyParentsLove};
+});
+
+const NexGenStory = lazy(async () => {
+  const module = await import('~/components/NexGenStory');
+  return {default: module.NexGenStory};
+});
+
+const NewsletterCTA = lazy(async () => {
+  const module = await import('~/components/NewsletterCTA');
+  return {default: module.NewsletterCTA};
+});
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -28,6 +45,13 @@ export async function loader({context}: Route.LoaderArgs) {
 
 export default function Homepage() {
   const data = useLoaderData<typeof loader>();
+
+  const sectionFallback = (
+    <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-10 py-10 sm:py-14">
+      <div className="h-40 rounded-3xl bg-gradient-to-r from-nexgen-night/5 via-nexgen-orange/10 to-nexgen-teal/10 animate-pulse" />
+    </div>
+  );
+
   return (
     <div className="bg-nexgen-mist">
       {data.isShopLinked ? null : (
@@ -39,10 +63,18 @@ export default function Homepage() {
       <NexGenHero />
       <ShopByAge />
       <FeaturedCategories />
-      <AllProducts />
-      <WhyParentsLove />
-      <NexGenStory />
-      <NewsletterCTA />
+      <Suspense fallback={sectionFallback}>
+        <AllProducts />
+      </Suspense>
+      <Suspense fallback={sectionFallback}>
+        <WhyParentsLove />
+      </Suspense>
+      <Suspense fallback={sectionFallback}>
+        <NexGenStory />
+      </Suspense>
+      <Suspense fallback={sectionFallback}>
+        <NewsletterCTA />
+      </Suspense>
     </div>
   );
 }

@@ -10,6 +10,12 @@ type CartSummaryProps = {
 };
 
 export function CartSummary({cart, layout}: CartSummaryProps) {
+  const subtotal = cart?.cost?.subtotalAmount;
+  const total = cart?.cost?.totalAmount;
+  const subtotalNum = subtotal?.amount ? parseFloat(subtotal.amount) : 0;
+  const totalNum = total?.amount ? parseFloat(total.amount) : 0;
+  const savings = Math.max(0, subtotalNum - totalNum);
+
   return (
     <div
       aria-labelledby="cart-summary"
@@ -18,11 +24,28 @@ export function CartSummary({cart, layout}: CartSummaryProps) {
       <div className="flex items-baseline justify-between">
         <h4 id="cart-summary" className="font-display font-black uppercase text-sm tracking-wider text-nexgen-night/60 dark:text-slate-400">Subtotal</h4>
         <span className="text-2xl font-display font-black text-nexgen-night dark:text-white tabular-nums">
-          {cart?.cost?.subtotalAmount?.amount ? (
-            <Money data={cart?.cost?.subtotalAmount} />
+          {subtotal?.amount ? (
+            <Money data={subtotal} />
           ) : '—'}
         </span>
       </div>
+
+      {savings > 0 && total?.amount && (
+        <div className="flex items-baseline justify-between rounded-xl bg-emerald-50 dark:bg-emerald-500/10 px-3 py-2 ring-1 ring-emerald-200/70 dark:ring-emerald-400/25">
+          <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">Discount savings</span>
+          <span className="text-sm font-bold tabular-nums text-emerald-700 dark:text-emerald-300">
+            -{subtotal?.currencyCode || 'INR'} {savings.toFixed(2)}
+          </span>
+        </div>
+      )}
+
+      <div className="flex items-baseline justify-between">
+        <h5 className="font-display font-black uppercase text-sm tracking-wider text-nexgen-night/70 dark:text-slate-300">Total after discount</h5>
+        <span className="text-xl font-display font-black text-nexgen-purple dark:text-nexgen-yellow tabular-nums">
+          {total?.amount ? <Money data={total} /> : '—'}
+        </span>
+      </div>
+
       <p className="text-[11px] text-nexgen-night/55 dark:text-slate-500">
         Taxes and shipping calculated at checkout.
       </p>

@@ -31,6 +31,7 @@ const FILTER_CHIPS: {key: Filter; label: string}[] = [
  */
 export function AllProducts() {
   const [filter, setFilter] = useState<Filter>('all');
+  const [showAll, setShowAll] = useState(false);
 
   const products = useMemo(
     () =>
@@ -39,6 +40,16 @@ export function AllProducts() {
         : NEXGEN_PRODUCTS.filter((p) => p.category === filter),
     [filter],
   );
+
+  useEffect(() => {
+    setShowAll(false);
+  }, [filter]);
+
+  const initialVisibleCount = 8;
+  const visibleProducts = showAll
+    ? products
+    : products.slice(0, initialVisibleCount);
+  const hasMoreProducts = visibleProducts.length < products.length;
 
   return (
     <section className="relative py-20 sm:py-28 bg-white">
@@ -104,11 +115,23 @@ export function AllProducts() {
           className="mt-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-7 lg:gap-8"
         >
           <AnimatePresence initial={false}>
-            {products.map((p, i) => (
+            {visibleProducts.map((p, i) => (
               <ProductCard key={p.handle} product={p} index={i} />
             ))}
           </AnimatePresence>
         </motion.div>
+
+        {hasMoreProducts && (
+          <div className="mt-8 flex justify-center">
+            <button
+              type="button"
+              onClick={() => setShowAll(true)}
+              className="inline-flex items-center justify-center rounded-full bg-nexgen-night text-white px-5 py-2.5 text-sm font-semibold hover:bg-nexgen-night/90 transition"
+            >
+              Show all products ({products.length})
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );

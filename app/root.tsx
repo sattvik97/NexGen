@@ -23,6 +23,9 @@ const CursorParticles = lazy(() =>
 );
 import {themeNoFlashScript} from './components/ThemeToggle';
 
+const FALLBACK_SOCIAL_IMAGE =
+  'https://cdn.shopify.com/s/files/1/0721/9704/6361/files/ChatGPTImageMay18_2026_11_27_29AM.png?v=1779087548&width=1200';
+
 export type RootLoader = typeof loader;
 
 /**
@@ -102,7 +105,7 @@ export async function loader(args: Route.LoaderArgs) {
       publicStorefrontId: env.PUBLIC_STOREFRONT_ID,
     }),
     consent: {
-      checkoutDomain: env.PUBLIC_CHECKOUT_DOMAIN,
+      checkoutDomain: env.PUBLIC_CHECKOUT_DOMAIN || env.PUBLIC_STORE_DOMAIN,
       storefrontAccessToken: env.PUBLIC_STOREFRONT_API_TOKEN,
       withPrivacyBanner: false,
       // localize the privacy banner
@@ -168,10 +171,10 @@ export function Layout({children}: {children?: React.ReactNode}) {
     '@type': 'Organization',
     name: 'NexGen Toys',
     url: 'https://nexgen.toys',
-    logo: 'https://nexgen.toys/cdn/shop/files/nexgen-logo.png',
+    logo: FALLBACK_SOCIAL_IMAGE,
     sameAs: [
       'https://www.facebook.com/nexgentoys',
-      'https://www.instagram.com/nexgentoys',
+      'https://www.instagram.com/nexgen_toys?igsh=dGJ4Ynl5ZnZldGM0',
     ],
   };
   const siteJsonLd = {
@@ -220,14 +223,14 @@ export function Layout({children}: {children?: React.ReactNode}) {
           property="og:description"
           content="Premium RC cars, helicopters, drones, soft toys, board games and outdoor fun for every age."
         />
-        <meta property="og:image" content="https://nexgen.toys/cdn/shop/files/nexgen-og.jpg" />
+        <meta property="og:image" content={FALLBACK_SOCIAL_IMAGE} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="NexGen Toys — Toys at best price. Buy new." />
         <meta
           name="twitter:description"
           content="Premium RC cars, helicopters, drones, soft toys, board games and outdoor fun for every age."
         />
-        <meta name="twitter:image" content="https://nexgen.toys/cdn/shop/files/nexgen-og.jpg" />
+        <meta name="twitter:image" content={FALLBACK_SOCIAL_IMAGE} />
         {/* Load global resets first, app overrides next, then Tailwind utilities last
             so utility classes (text-white, bg-*, etc.) always win the cascade. */}
         <link rel="stylesheet" href={resetStyles}></link>
@@ -272,13 +275,14 @@ function DeferredCursorParticles() {
     const coarse = window.matchMedia('(hover: none), (pointer: coarse)').matches;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (coarse || reduce) return;
-    const w = window as Window & {requestIdleCallback?: (cb: () => void, opts?: {timeout: number}) => number};
-    const ric = w.requestIdleCallback;
-    const id = ric
-      ? ric(() => setReady(true), {timeout: 2000})
+    const hasRic = typeof window.requestIdleCallback === 'function';
+    const id = hasRic
+      ? window.requestIdleCallback(() => setReady(true), {timeout: 2000})
       : window.setTimeout(() => setReady(true), 1200);
     return () => {
-      if (ric && typeof id === 'number') (window as unknown as {cancelIdleCallback: (n: number) => void}).cancelIdleCallback?.(id);
+      if (hasRic) {
+        window.cancelIdleCallback(id as number);
+      }
       else window.clearTimeout(id as number);
     };
   }, []);

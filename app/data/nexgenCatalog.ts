@@ -162,24 +162,100 @@ export const NEXGEN_AGES: NexGenAgeBand[] = [
 ];
 
 /* ------------------------------ Products ----------------------------- */
+/**
+ * Branded SVG placeholder used until product photos are uploaded.
+ * Deterministic per product (hash of handle picks colour & shape) so the
+ * same product always renders the same image across reloads.
+ */
+const PLACEHOLDER_PALETTES: Array<{bg: string; accent: string; fg: string}> = [
+  {bg: '#FF6B35', accent: '#FFE66D', fg: '#0f172a'},
+  {bg: '#6C63FF', accent: '#4ECDC4', fg: '#ffffff'},
+  {bg: '#4ECDC4', accent: '#FFE66D', fg: '#0f172a'},
+  {bg: '#0f172a', accent: '#FF6B35', fg: '#ffffff'},
+  {bg: '#FFE66D', accent: '#FF6B35', fg: '#0f172a'},
+  {bg: '#fff8ee', accent: '#6C63FF', fg: '#0f172a'},
+];
+
+function hashString(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
+
+function escapeXml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+export function placeholderImage(handle: string, title: string): string {
+  const palette = PLACEHOLDER_PALETTES[hashString(handle) % PLACEHOLDER_PALETTES.length];
+  const short = title.length > 38 ? title.slice(0, 36).trimEnd() + '\u2026' : title;
+  // Split the label into up to three lines (~22 chars each) so long titles wrap.
+  const words = short.split(/\s+/);
+  const lines: string[] = [];
+  let current = '';
+  for (const w of words) {
+    if ((current + ' ' + w).trim().length > 22) {
+      if (current) lines.push(current);
+      current = w;
+    } else {
+      current = (current + ' ' + w).trim();
+    }
+    if (lines.length === 2) break;
+  }
+  if (current && lines.length < 3) lines.push(current);
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 720" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="${palette.bg}" />
+        <stop offset="100%" stop-color="${palette.accent}" />
+      </linearGradient>
+    </defs>
+    <rect width="720" height="720" fill="url(#g)" />
+    <circle cx="560" cy="160" r="180" fill="${palette.accent}" opacity="0.35" />
+    <circle cx="140" cy="600" r="220" fill="${palette.bg}" opacity="0.35" />
+    <g font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif" fill="${palette.fg}" text-anchor="middle">
+      <text x="360" y="${360 - (lines.length - 1) * 28}" font-size="46" font-weight="800">${lines
+    .map(
+      (line, i) =>
+        `<tspan x="360" dy="${i === 0 ? 0 : 56}">${escapeXml(line)}</tspan>`,
+    )
+    .join('')}</text>
+      <text x="360" y="660" font-size="22" font-weight="700" letter-spacing="6" opacity="0.85">NEXGEN TOYS</text>
+    </g>
+  </svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
+const SHOPIFY_FILE_BASE = 'https://cdn.shopify.com/s/files/1/0721/9704/6361/files';
+
+export function shopifyImage(
+  fileName: string,
+  version: number | string,
+  width = 720,
+): string {
+  return `${SHOPIFY_FILE_BASE}/${fileName}?v=${version}&width=${width}`;
+}
+
 export const NEXGEN_PRODUCTS: NexGenProduct[] = [
   {
-    handle:
-      '1-18-cyber-truck-rc-car-high-speed-remote-control-electric-pickup-truck-with-led-lights-usb-charging',
+    handle: '1-18-cyber-truck-rc-car-high-speed-remote-control-electric-pickup-truck-with-led-lights-usb-charging',
     title: '1:18 Cyber Truck RC Car — LED Lights & USB Charging',
     priceINR: 1499,
-    image:
-      'https://nexgen.toys/cdn/shop/files/ChatGPTImageMay18_2026_11_27_29AM.png?v=1779087548&width=720',
+    image: shopifyImage('ChatGPTImageMay18_2026_11_27_29AM.png', 1779087548),
     category: 'rc-cars',
     badge: 'new',
   },
   {
-    handle:
-      '1-64-rc-drift-car-with-led-lights-2-4ghz-remote-control-rechargeable-mini-racing-car-toy-for-kids',
+    handle: '1-64-rc-drift-car-with-led-lights-2-4ghz-remote-control-rechargeable-mini-racing-car-toy-for-kids',
     title: '1:64 RC Drift Car with LED Lights & 2.4 GHz Remote',
     priceINR: 1999,
-    image:
-      'https://nexgen.toys/cdn/shop/files/ChatGPTImageMay18_2026_12_48_56PM.png?v=1779102118&width=720',
+    image: shopifyImage('ChatGPTImageMay18_2026_12_48_56PM.png', 1779102118),
     category: 'rc-cars',
     badge: 'hot',
   },
@@ -187,14 +263,14 @@ export const NEXGEN_PRODUCTS: NexGenProduct[] = [
     handle: '2-wheel-kick-scooter',
     title: '2-Wheel Kick Scooter',
     priceINR: 3999,
-    image: 'https://nexgen.toys/cdn/shop/files/scooter_final_1200.jpg?v=1772777120&width=720',
+    image: shopifyImage('scooter_final_1200.jpg', 1772777120),
     category: 'outdoor-toys',
   },
   {
     handle: 'pastel-bubble-gun-toy',
     title: 'Pastel Bubble Gun Toy',
     priceINR: 750,
-    image: 'https://nexgen.toys/cdn/shop/files/tight_2.jpg?v=1772777507&width=720',
+    image: shopifyImage('tight_2.jpg', 1772777507),
     category: 'guns',
     badge: 'hot',
   },
@@ -202,37 +278,38 @@ export const NEXGEN_PRODUCTS: NexGenProduct[] = [
     handle: 'dancing-robot-toy',
     title: 'Dancing Robot Toy with Lights & Music',
     priceINR: 750,
-    image:
-      'https://nexgen.toys/cdn/shop/files/40339582_1-toyshine-toyshine-bot-robot-pioneer-colorful-lights-and-music-all-direction-movement-dancing-robot-toys-for-boys-and-girls-blue-color.webp?v=1771867566&width=720',
+    image: shopifyImage(
+      '40339582_1-toyshine-toyshine-bot-robot-pioneer-colorful-lights-and-music-all-direction-movement-dancing-robot-toys-for-boys-and-girls-blue-color.webp',
+      1771867566,
+    ),
     category: 'kid-toys',
   },
   {
     handle: 'dinosaur-self-spell-box',
     title: 'Dinosaur Self-Spell Box',
     priceINR: 750,
-    image: 'https://nexgen.toys/cdn/shop/files/dinosaur_1200_clean.jpg?v=1772777028&width=720',
+    image: shopifyImage('dinosaur_1200_clean.jpg', 1772777028),
     category: 'puzzles',
   },
   {
     handle: 'drift-car',
     title: 'Drift Car',
     priceINR: 1100,
-    image: 'https://nexgen.toys/cdn/shop/files/71S-4Em2fHL._SL1500.jpg?v=1775907959&width=720',
+    image: shopifyImage('71S-4Em2fHL._SL1500.jpg', 1775907959),
     category: 'rc-cars',
   },
   {
     handle: 'fish-catching',
     title: 'Fish Catching Game',
     priceINR: 450,
-    image: 'https://nexgen.toys/cdn/shop/files/tight_5.jpg?v=1772777186&width=720',
+    image: shopifyImage('tight_5.jpg', 1772777186),
     category: 'board-games',
   },
   {
-    handle:
-      'high-speed-f1-racing-remote-control-car-with-led-smoke-powerful-engine-red-edition-2-4ghz-rc-formula-car-for-kids-adults',
+    handle: 'high-speed-f1-racing-remote-control-car-with-led-smoke-powerful-engine-red-edition-2-4ghz-rc-formula-car-for-kids-adults',
     title: 'High-Speed F1 Racing Car — LED Smoke, Red Edition',
     priceINR: 1499,
-    image: 'https://nexgen.toys/cdn/shop/files/rccar_1200_clean.jpg?v=1772776885&width=720',
+    image: shopifyImage('rccar_1200_clean.jpg', 1772776885),
     category: 'rc-cars',
     badge: 'best',
   },
@@ -240,36 +317,35 @@ export const NEXGEN_PRODUCTS: NexGenProduct[] = [
     handle: 'hungry-frog-game-for-kids',
     title: 'Hungry Frog Game for Kids',
     priceINR: 730,
-    image:
-      'https://nexgen.toys/cdn/shop/files/ChatGPTImageSep19_2025_10_55_59PM.png?v=1771859701&width=720',
+    image: shopifyImage('ChatGPTImageSep19_2025_10_55_59PM.png', 1771859701),
     category: 'board-games',
   },
   {
     handle: 'kids-studybook',
     title: 'Kids StudyBook — Early Learning',
     priceINR: 399,
-    image: 'https://nexgen.toys/cdn/shop/files/learning_book_1200_clean.jpg?v=1772777451&width=720',
+    image: shopifyImage('learning_book_1200_clean.jpg', 1772777451),
     category: 'kid-toys',
   },
   {
     handle: 'musical-cactus-toy',
     title: 'Musical Cactus Toy',
     priceINR: 350,
-    image: 'https://nexgen.toys/cdn/shop/files/converted_9.jpg?v=1772777253&width=720',
+    image: shopifyImage('converted_9.jpg', 1772777253),
     category: 'kid-toys',
   },
   {
     handle: 'musical-play-foot-piano-mat',
     title: 'Musical Play Foot Piano Mat',
     priceINR: 2500,
-    image: 'https://nexgen.toys/cdn/shop/files/converted_10.jpg?v=1772777096&width=720',
+    image: shopifyImage('converted_10.jpg', 1772777096),
     category: 'kid-toys',
   },
   {
     handle: 'retroplay-520-handheld-gaming-console',
     title: 'RetroPlay 520 Handheld Gaming Console',
     priceINR: 749,
-    image: 'https://nexgen.toys/cdn/shop/files/game_console_1200_clean.jpg?v=1772777483&width=720',
+    image: shopifyImage('game_console_1200_clean.jpg', 1772777483),
     category: 'hand-games',
     badge: 'hot',
   },
@@ -277,14 +353,14 @@ export const NEXGEN_PRODUCTS: NexGenProduct[] = [
     handle: 'rock-crawler-car',
     title: 'Rock Crawler Car',
     priceINR: 999,
-    image: 'https://nexgen.toys/cdn/shop/files/tight_12.jpg?v=1772777285&width=720',
+    image: shopifyImage('tight_12.jpg', 1772777285),
     category: 'rc-cars',
   },
   {
     handle: 'soft-gel-bead-shooter-with-colorful-camouflage-design',
     title: 'Soft Gel Bead Shooter — Camouflage',
     priceINR: 1499,
-    image: 'https://nexgen.toys/cdn/shop/files/tight_14.jpg?v=1772777539&width=720',
+    image: shopifyImage('tight_14.jpg', 1772777539),
     category: 'guns',
     badge: 'sold-out',
   },
@@ -292,15 +368,14 @@ export const NEXGEN_PRODUCTS: NexGenProduct[] = [
     handle: 'tethered-tennis',
     title: 'Tethered Tennis',
     priceINR: 550,
-    image: 'https://nexgen.toys/cdn/shop/files/tight_15.jpg?v=1772777165&width=720',
+    image: shopifyImage('tight_15.jpg', 1772777165),
     category: 'outdoor-toys',
   },
   {
     handle: 'young-scientist-educational-science-kit',
     title: 'Young Scientist Educational Science Kit',
     priceINR: 750,
-    image:
-      'https://nexgen.toys/cdn/shop/files/young_scientist_1200_clean.jpg?v=1772777318&width=720',
+    image: shopifyImage('young_scientist_1200_clean.jpg', 1772777318),
     category: 'kid-toys',
     badge: 'best',
   },

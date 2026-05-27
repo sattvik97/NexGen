@@ -1,4 +1,10 @@
-import {useRef, useState, type MouseEvent, type ReactNode} from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type MouseEvent,
+  type ReactNode,
+} from 'react';
 import {motion, useMotionValue, useSpring, useTransform} from 'framer-motion';
 
 /**
@@ -34,6 +40,29 @@ export function MagneticTilt({
   const [ripple, setRipple] = useState<{id: number; x: number; y: number} | null>(
     null,
   );
+  const [interactive, setInteractive] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+      return;
+    }
+
+    const coarsePointerQuery = window.matchMedia('(pointer: coarse)');
+    const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    const updateInteractiveMode = () => {
+      setInteractive(!coarsePointerQuery.matches && !reducedMotionQuery.matches);
+    };
+
+    updateInteractiveMode();
+    coarsePointerQuery.addEventListener('change', updateInteractiveMode);
+    reducedMotionQuery.addEventListener('change', updateInteractiveMode);
+
+    return () => {
+      coarsePointerQuery.removeEventListener('change', updateInteractiveMode);
+      reducedMotionQuery.removeEventListener('change', updateInteractiveMode);
+    };
+  }, []);
 
   // Normalized mouse position (-0.5 .. 0.5)
   const mx = useMotionValue(0);
@@ -79,6 +108,10 @@ export function MagneticTilt({
     mx.set(0);
     my.set(0);
   };
+
+  if (!interactive) {
+    return <div className={`relative ${rounded} ${className}`}>{children}</div>;
+  }
 
   return (
     <motion.div

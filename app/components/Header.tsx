@@ -258,9 +258,8 @@ function PrimaryNav({
     >
       <ul className="mx-auto max-w-7xl flex items-center justify-center gap-6 sm:gap-10 px-4 py-3 text-sm font-semibold text-nexgen-night/80 overflow-x-auto">
         <PrimaryNavItem to="/" end label="Home" />
-        <PrimaryNavItem to="/collections/all" label="Catalog" />
-        <PrimaryNavItem to="/pages/contact" label="Contact" />
-        <PrimaryNavItem to="/collections" label="All collections" />
+        <PrimaryNavItem to="/collections/all" label="All Products" />
+        <PrimaryNavItem to="/pages/contact" label="Contact Us" />
       </ul>
     </nav>
   );
@@ -381,7 +380,15 @@ export function HeaderMenu({
   publicStoreDomain: string;
 }) {
   const {close} = useAside();
-  const items = (menu || FALLBACK_HEADER_MENU).items;
+  const items = (menu || FALLBACK_HEADER_MENU).items
+    .filter((item) => item.title.toLowerCase() !== 'all collections')
+    .map((item) =>
+      item.title.toLowerCase() === 'catalog'
+        ? {...item, title: 'All Products'}
+        : item.title.toLowerCase() === 'contact'
+          ? {...item, title: 'Contact Us'}
+          : item,
+    );
   return (
     <nav
       role="navigation"
